@@ -29,8 +29,17 @@ public class GraphQueryByMongoDbImpl implements GraphQueryService {
         return Integer.parseInt(insNum.toString());
     }
 
+    //db.getCollection("resource").find({$and:[{"categories.name":"手机"},{"categories.name":"科技产品"}]}).count()
     @Override
-    public List<Triple> queryAllPPVofCategory(String categoryName) {
+    public Integer querySameInstanceBetweenCategory(String categoryName, String anotherCategoryName) {
+        Query query = new Query(Criteria.where("categories.name").is(categoryName).
+                andOperator(Criteria.where("categories.name").is(anotherCategoryName)));
+        Long sameInsNum = mongoTemplate.count(query, Resource.class);
+        return Integer.parseInt(sameInsNum.toString());
+    }
+
+    @Override
+    public List<String> queryAllPropertyOfCategory(String categoryName) {
         List<String> properties = new ArrayList<>();
 
         TypedAggregation<Resource> aggregation = Aggregation.newAggregation(Resource.class,
@@ -38,29 +47,35 @@ public class GraphQueryByMongoDbImpl implements GraphQueryService {
                 Aggregation.project().and("properties.name").as("name"),
                 Aggregation.unwind("name"),
                 Aggregation.group("name"));
-        AggregationResults<String> results = mongoTemplate.aggregate(aggregation,"resource",String.class);
-        for(String res:results.getMappedResults()){
-            properties.add(String.valueOf(JSON.parse(res).get("_id")).replace("\"",""));
+        AggregationResults<String> results = mongoTemplate.aggregate(aggregation, "resource", String.class);
+        for (String res : results.getMappedResults()) {
+            properties.add(String.valueOf(JSON.parse(res).get("_id")).replace("\"", ""));
         }
-
-        return null;
+        return properties;
     }
 
     @Override
-    public List<Triple> queryAllInstanceAndCategoryOfProperty(String proName) {
-        return null;
+    public List<String> queryAllCategoryOfProperty(String propertyName) {
+        List<String> categories = new ArrayList<>();
+
+        TypedAggregation<Resource> aggregation = Aggregation.newAggregation(Resource.class,
+                Aggregation.match(Criteria.where("properties.name").is(propertyName)),
+                Aggregation.project().and("categories.name").as("name"),
+                Aggregation.unwind("name"),
+                Aggregation.group("name"));
+
+        AggregationResults<String> results = mongoTemplate.aggregate(aggregation, "resource", String.class);
+        for (String res : results.getMappedResults()) {
+            categories.add(String.valueOf(JSON.parse(res).get("_id")).replace("\"", ""));
+        }
+        return categories;
     }
 
     @Override
-    public List<Triple> queryAllInstanceAndCategoryOfPV(String proVName) {
-        return null;
-    }
-
-    //db.getCollection("resource").find({$and:[{"categories.name":"手机"},{"categories.name":"科技产品"}]}).count()
-    @Override
-    public Integer querySameInstanceBetweenCategory(String categoryName, String anotherCategoryName) {
-        Query query = new Query(Criteria.where("categories.name").is(categoryName).and("categories.name").is(anotherCategoryName));
-        Long sameInsNum = mongoTemplate.count(query, Resource.class);
-        return Integer.parseInt(sameInsNum.toString());
+    public Integer queryPropertyInstanceNumOfCategory(String propertyName, String categoryName) {
+        Query query = new Query(Criteria.where("categories.name").is(categoryName)
+                .and("properties.name").is(propertyName));
+        Long insNum = mongoTemplate.count(query, Resource.class);
+        return Integer.parseInt(insNum.toString());
     }
 }

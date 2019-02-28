@@ -15,35 +15,29 @@ public interface GraphQueryService {
     public Integer countAllInstanceNum(String categoryName);
 
     /**
-     * 查询一个目录中所有属性和属性值
-     *
-     * @param categoryName
-     * @return
-     */
-    public List<Triple> queryAllPPVofCategory(String categoryName);
-
-    /**
-     * 查询一个属性的所有实例和目录
-     *
-     * @param proName
-     * @return
-     */
-    public List<Triple> queryAllInstanceAndCategoryOfProperty(String proName);
-
-    /**
-     * 查询一个属性值的所有实例和目录
-     * @param pro
-     * @return
-     */
-    public List<Triple> queryAllInstanceAndCategoryOfPV(String proVName);
-
-    /**
      * 查询两个领域拥有的相同实例的个数
      * @param categoryName
      * @param anotherCategoryName
      * @return
      */
     public Integer querySameInstanceBetweenCategory(String categoryName,String anotherCategoryName);
+
+    /**
+     * 查询目录下的所有属性
+     * @param categoryName
+     * @return
+     */
+    public List<String> queryAllPropertyOfCategory(String categoryName);
+
+    /**
+     * 查询一个属性所在的所有目录
+     * @param propertyName
+     * @return
+     */
+    public List<String> queryAllCategoryOfProperty(String propertyName);
+
+
+    public Integer queryPropertyInstanceNumOfCategory(String propertyName,String categoryName);
 
 
 }
