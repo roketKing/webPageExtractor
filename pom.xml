@@ -76,8 +76,10 @@
 			<artifactId>hanlp</artifactId>
 			<version>portable-1.7.1</version>
 		</dependency>
-
-
+		<dependency>
+			<groupId>org.elasticsearch.client</groupId>
+			<artifactId>elasticsearch-rest-high-level-client</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.franz</groupId>
 			<artifactId>agraph-java-client</artifactId>

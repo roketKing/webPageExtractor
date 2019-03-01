@@ -78,16 +78,19 @@ public class TaskController {
         WebDriver driver = pageCrawlService.getDriver();
         String keyword = taskInfoDto.getKeyword();
         List<ListPage> listPages = pageCrawlService.getListPage(taskInfoDto.getLink(), taskInfoDto.getId(), driver, 1);
+
         List<DetailPage> correctDetailPage = new ArrayList<>();
         List<DetailPage> notCorrectDetailPages = new ArrayList<>();
+
         for (ListPage listPage : listPages) {
             List<String> links = pageCrawlService.getListPageALink(keyword, listPage);
+
             for (String link : links) {
                 DetailPage detailPage = pageCrawlService.getDetailPage(link, taskInfoDto.getId(), listPage.getId(), driver);
                 List<String> contexts = detailPageFeatureService.getSpecialTagContextFeature(detailPage);
                 detailPage.setSpeacilContext(contexts);
                 //查询属性领域分值数据库
-                Float contextDomainScore = graphScoreService.contextDomainScoreCalculate(contexts);
+                Float contextDomainScore = graphScoreService.contextDomainScoreCalculate(contexts,taskInfoDto.getDomain());
                 if (contextDomainScore > 100) {
                     // 是领域相关的页面  不是噪声
                     correctDetailPage.add(detailPage);
@@ -104,6 +107,8 @@ public class TaskController {
                 correctDetailPage.add(notCorrectDetailPage);
             }
         }
+        //对详情页和列表页进行抽取
+
         //将结果记录到数据库中
         return null;
     }

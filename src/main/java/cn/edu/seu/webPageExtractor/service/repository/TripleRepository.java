@@ -83,7 +83,7 @@ public interface TripleRepository extends CrudRepository<Triple, Integer> {
     List<String> findAllResourceUri(Integer pageNum, Integer pageSize);
 
     @Query(value = "select predict,object from " +
-            "category_spo_4 where predict like '%property%' and subject=?1 ;", nativeQuery = true)
+            "infobox where predict like '%property%' and subject=?1 ;", nativeQuery = true)
     List<Object> findResourceProperty(String resourceId);
 
 

@@ -3,6 +3,7 @@ package cn.edu.seu.webPageExtractor.graph.service.impl;
 import cn.edu.seu.webPageExtractor.core.GraphScoreInfo;
 import cn.edu.seu.webPageExtractor.graph.Triple;
 import cn.edu.seu.webPageExtractor.graph.service.GraphQueryService;
+import cn.edu.seu.webPageExtractor.graph.service.GraphSearchService;
 import cn.edu.seu.webPageExtractor.service.manage.GraphScoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,9 @@ public class GraphScoreCalculateService {
     private GraphQueryService graphQueryService;
     @Autowired
     private GraphScoreManager graphScoreManager;
+    @Autowired
+    private GraphSearchService graphSearchService;
+
     @Value("${graph.domain.num}")
     private Integer GRAPH_DOMAIN_NUM;
     @Value("${graph.parentDomain.num}")
@@ -90,5 +94,24 @@ public class GraphScoreCalculateService {
             sameInstanceNum = graphQueryService.querySameInstanceBetweenCategory(qCategory, categoryName);
         }
         return sameInstanceNum > PARENT_DOMAIN_NUM;
+    }
+
+
+    public Float calculateWordDomainScore(String categoryName,String word){
+        Float scoreResult = 0.0f;
+        //先通过es搜索对应的属性
+        String propertyName = graphSearchService.searchByWord(categoryName,word);
+        if (propertyName!=null){
+            //再通过mysql查询对应属性的分值
+            GraphScoreInfo graphScoreInfo = new GraphScoreInfo();
+            graphScoreInfo.setDomain(categoryName);
+            graphScoreInfo.setProperty(propertyName);
+            GraphScoreInfo result = graphScoreManager.queryScoreByDomainAndProperty(graphScoreInfo);
+            if (result!=null){
+                scoreResult = result.getScore();
+            }
+        }
+        return scoreResult;
+
     }
 }

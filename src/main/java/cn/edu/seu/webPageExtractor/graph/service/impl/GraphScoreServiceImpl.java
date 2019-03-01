@@ -25,20 +25,20 @@ public class GraphScoreServiceImpl implements GraphScoreService {
 
         List<String> properties = graphQueryService.queryAllPropertyOfCategory(categoryName);
 
-        for (int i=0;i<properties.size();i++) {
+        for (int i = 0; i < properties.size(); i++) {
             String propertyName = properties.get(i);
-            String tempPropertyName = propertyName.replace(" ","");
+            String tempPropertyName = propertyName.replace(" ", "");
             if (tempPropertyName.length() != 1) {
                 try {
                     graphScoreCalculateService.ppvScoreCalculate(categoryName, propertyName, domainInstanceNum, true);
-                    if (i%100==0){
-                        logger.info("已经进行到了"+i);
+                    if (i % 100 == 0) {
+                        logger.info("已经进行到了" + i);
                     }
                 } catch (TaskRejectedException e) {
                     try {
                         Thread.sleep(1000);
-                        i=i-1;
-                        logger.info("属性:"+propertyName);
+                        i = i - 1;
+                        logger.info("属性:" + propertyName);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
@@ -48,7 +48,12 @@ public class GraphScoreServiceImpl implements GraphScoreService {
     }
 
     @Override
-    public Float contextDomainScoreCalculate(List<String> context) {
-        return 200.f;
+    public Float contextDomainScoreCalculate(List<String> contexts, String domainName) {
+        Float sumResult = 0.0f;
+        for (String context : contexts) {
+            Float qResult = graphScoreCalculateService.calculateWordDomainScore(domainName, context);
+            sumResult = sumResult + qResult;
+        }
+        return sumResult;
     }
 }
