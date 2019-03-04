@@ -37,18 +37,32 @@ public class GraphSearchServiceImpl implements GraphSearchService {
         request.setRequest(new SearchRequest("test"));
 
         request.setScriptType(ScriptType.INLINE);
-        request.setScript("{" +
-                "\"query\":{" +
-                "\"bool\":{" +
-                "\"should\":[" +
-                "{\"match\" : {" +
-                " \"{{field1}}\":\"{{value1}}\"" +
-                "}},{" +
-                "\"match\":{" +
-                "\"{{field2}}\" : \"{{value2}}\"" +
-                "}}" +
-                "]" +
-                "}}}"
+        request.setScript("{\n" +
+                "  \"query\": {\n" +
+                "    \"bool\": {\n" +
+                "      \"should\": [\n" +
+                "        {\n" +
+                "          \"match\": {\n" +
+                "            \"{{field1}}\": \"{{value1}}\"\n" +
+                "          }\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"match\": {\n" +
+                "            \"{{field2}}\": \"{{value2}}\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"highlight\":{\n" +
+                "    \"pre_tags\":[\"\"],\n" +
+                "    \"post_tags\":[\"\"],\n" +
+                "    \"fields\":{\n" +
+                "      \"categories.name\":{},\n" +
+                "      \"properties.name\":{}\n" +
+                "    }\n" +
+                "  }\n" +
+                "}"
         );
 
         Map<String, Object> scriptParams = new HashMap<>();
@@ -73,7 +87,11 @@ public class GraphSearchServiceImpl implements GraphSearchService {
                         if (categorySet.contains(categoryName)) {
                             //只返回在匹配领域得分最高的
                             List<String> propertySet = parseHighlightFields(hit.getHighlightFields().get("properties.name"));
-                            result = propertySet.get(0);
+                            if (propertySet.size()!=0){
+                                result = propertySet.get(0);
+                                break;
+                            }
+
                         }
                     }
                 }

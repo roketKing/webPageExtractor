@@ -102,21 +102,33 @@ public class PageCrawlServiceImpl implements PageCrawlService {
         List<String> result = new ArrayList<>();
         List<Term> termList = HanLP.segment(searchWord);
         Node node = listPage.getNode();
-        Set<WebElement> elementSet = new HashSet<>();
+        Map<String,List<WebElement>> elementMap = new HashMap<>();
         for (Term term : termList){
             String segWord = term.word;
             List<WebElement> elements = node.getElement().findElements(By.partialLinkText(segWord));
-            if (elementSet.size()==0){
-                elementSet.addAll(elements);
-            }else {
-                elementSet.retainAll(elements);
-            }
+            elementMap.put(segWord,elements);
+        }
+        for (Map.Entry<String,List<WebElement>> elementMapEntry:elementMap.entrySet()){
+            List<WebElement> elementList = elementMapEntry.getValue();
+            List<String> tempResult = new ArrayList<>();
+            for (int i=0;i<elementList.size();i++) {
+                try{
+                    WebElement element = elementList.get(i);
 
+                    String link = element.getAttribute("href");
+                    tempResult.add(link);
+                }catch (Exception e){
+                    logger.error(e.toString());
+                    i=i-1;
+                }
+            }
+            if (result.size()==0){
+                result.addAll(tempResult);
+            }else {
+                result.retainAll(tempResult);
+            }
         }
-        for (WebElement element : elementSet) {
-            String link = element.getAttribute("href");
-            result.add(link);
-        }
+
         return result;
 
 
@@ -134,16 +146,13 @@ public class PageCrawlServiceImpl implements PageCrawlService {
         //存入本地
         try {
             String fileLocation = FileLocationEnum.DETAILPAGELOCATION.getLocation()
-                    + taskId + link.substring(15) + ".html";
+                    + taskId + link.substring(link.length()-15) + ".html";
             String innerText = body.getElement().getAttribute("innerHTML");
             FileUtils.write(new File(fileLocation), innerText, "utf-8");
             detailPage.setLocation(fileLocation);
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
-        //存入数据库并返回id
-        DetailPageInfo detailPageInfo = detailPageInfoManager.saveDetailPageInfo(detailPage);
-        detailPage.setId(detailPageInfo.getId());
         return detailPage;
     }
 
@@ -158,6 +167,7 @@ public class PageCrawlServiceImpl implements PageCrawlService {
         try{
         WebElement next = element.findElement(By.partialLinkText("下一页"));
         if (next != null) {
+            Thread.sleep(3000);
             next.click();
             Node nextElement = new Node();
             nextElement.setElement(next);

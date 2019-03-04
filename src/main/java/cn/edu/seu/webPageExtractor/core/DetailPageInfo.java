@@ -14,7 +14,7 @@ public class DetailPageInfo {
     private Date time;
     private String location;
     private Integer listId;
-    private Integer noise;
+    private Float noise;
 
     public Integer getId() {
         return id;
@@ -64,11 +64,11 @@ public class DetailPageInfo {
         this.listId = listId;
     }
 
-    public Integer getNoise() {
+    public Float getNoise() {
         return noise;
     }
 
-    public void setNoise(Integer noise) {
+    public void setNoise(Float noise) {
         this.noise = noise;
     }
 }

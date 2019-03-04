@@ -18,7 +18,7 @@ public interface GraphScoreRepository extends CrudRepository<GraphScoreInfo,Inte
      * @param property
      * @return
      */
-    GraphScoreInfo findGraphScoreInfoByDomainAndProperty(String property,String domain);
+    GraphScoreInfo findGraphScoreInfoByDomainAndProperty(String domain,String property);
 
     /**
      * 通过属性值查询分值

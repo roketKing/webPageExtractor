@@ -31,8 +31,8 @@ public class GraphScoreManager {
      */
     public GraphScoreInfo queryScoreByDomainAndProperty(GraphScoreInfo graphScoreInfo) {
         try {
-           return   graphScoreRepository.findGraphScoreInfoByDomainAndProperty(graphScoreInfo.getProperty(),
-                    graphScoreInfo.getDomain());
+           return   graphScoreRepository.findGraphScoreInfoByDomainAndProperty(graphScoreInfo.getDomain(),
+                   graphScoreInfo.getProperty());
         } catch (Exception e)
         {
             e.printStackTrace();

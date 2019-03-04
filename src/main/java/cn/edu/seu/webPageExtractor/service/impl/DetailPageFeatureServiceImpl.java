@@ -7,19 +7,18 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
-    private Integer linkNum;
-    private Integer codeNum;
+    private Integer linkNum = 0;
 
     @Override
     public List<String> getSpecialTagContextFeature(DetailPage detailPage) {
@@ -35,14 +34,24 @@ public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
         for (Element specialEle : specialElements) {
             loopElementGetSpecialContext(specialEle, context);
         }
-        return context;
+        return contextDeal(context);
+    }
+
+    private List<String> contextDeal(List<String> contexts){
+        Set<String> result = new HashSet<>();
+        for (String context:contexts){
+            if (context.trim().length()!=1){
+                result.add(context);
+            }
+        }
+        return new ArrayList<>(result);
     }
 
     /**
      * 遍历获取特殊标签的文本
      *
-     * @param parent
-     * @param context
+     * @param specialEle
+     * @param contexts
      */
     private void loopElementGetSpecialContext(Element specialEle, List<String> contexts) {
         List<Node> nodes = specialEle.childNodes();
@@ -52,13 +61,13 @@ public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
         for (Node node : nodes) {
             if (node.getClass().getName().contains("TextNode")) {
                 String tempText = node.toString();
-                tempText = tempText.replaceAll(" ","");
+                tempText = tempText.replaceAll(" ", "");
                 if (!tempText.isEmpty()) {
                     contexts.add(specialEle.text());
                 }
                 continue;
             }
-            if (node.getClass().getName().contains("Comment")||node.getClass().getName().contains("DataNode")) {
+            if (node.getClass().getName().contains("Comment") || node.getClass().getName().contains("DataNode")) {
                 continue;
             }
             if (node.nodeName().equals("a")) {
@@ -76,7 +85,6 @@ public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
     private void getBlockFeatureFromBlock(Block block) {
         //初始化
         linkNum = 0;
-        codeNum = 0;
         if (block != null) {
             getBlockContextAndContextDensity(block);
             //计算领域得分
@@ -88,16 +96,16 @@ public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
         WebElement blockBody = block.getNode().getElement();
         String innerHTML = blockBody.getAttribute("innerHTML");
 
-        Integer codeNum = innerHTML.length() - innerHTML.replace("\n","").length();
+        Integer codeNum = innerHTML.length() - innerHTML.replace("\n", "").length();
 
 
         Document document = Jsoup.parse(innerHTML);
         Element blockElement = document.body();
 
         List<String> contexts = new ArrayList<>();
-        loopElementGetSpecialContext(blockElement,contexts);
+        loopElementGetSpecialContext(blockElement, contexts);
         Integer contextNum = 0;
-        for (String  context : contexts) {
+        for (String context : contexts) {
             contextNum = contextNum + context.length();
         }
         block.setContext(contexts);
@@ -122,7 +130,6 @@ public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
             if (node.nodeName().equals("A")) {
                 linkNum++;
             }
-            codeNum++;
             loopBlock(node);
         }
     }
