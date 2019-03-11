@@ -19,7 +19,7 @@ public interface DetailPageFeatureService {
      * 详情页分块
      * @param detailPage
      */
-    public List<Block>  getBlockFromDetailPage(DetailPage detailPage);
+    public void getFeatureFromBlock(Block block,String domainInfo);
 
 
 

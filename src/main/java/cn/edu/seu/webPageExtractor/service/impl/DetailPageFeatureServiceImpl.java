@@ -2,6 +2,7 @@ package cn.edu.seu.webPageExtractor.service.impl;
 
 import cn.edu.seu.webPageExtractor.core.page.DetailPage;
 import cn.edu.seu.webPageExtractor.core.page.feature.Block;
+import cn.edu.seu.webPageExtractor.graph.service.GraphScoreService;
 import cn.edu.seu.webPageExtractor.service.DetailPageFeatureService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -9,6 +10,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.WebElement;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,11 +20,13 @@ import java.util.Set;
 
 @Service
 public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
+    @Autowired
+    private GraphScoreService graphScoreService;
     private Integer linkNum = 0;
 
     @Override
     public List<String> getSpecialTagContextFeature(DetailPage detailPage) {
-        WebElement parent = detailPage.getNode().getElement();
+        WebElement parent = detailPage.getBlock().getNode().getElement();
         List<String> context = new ArrayList<>();
         String innerHTML = parent.getAttribute("innerHTML");
         Document document = Jsoup.parse(innerHTML);
@@ -37,10 +41,10 @@ public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
         return contextDeal(context);
     }
 
-    private List<String> contextDeal(List<String> contexts){
+    private List<String> contextDeal(List<String> contexts) {
         Set<String> result = new HashSet<>();
-        for (String context:contexts){
-            if (context.trim().length()!=1){
+        for (String context : contexts) {
+            if (context.trim().length() != 1) {
                 result.add(context);
             }
         }
@@ -70,37 +74,42 @@ public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
             if (node.getClass().getName().contains("Comment") || node.getClass().getName().contains("DataNode")) {
                 continue;
             }
-            if (node.nodeName().equals("a")) {
-                linkNum++;
+            if (node.nodeName().equals("a") && node.hasAttr("href")) {
+                String href = node.attr("href");
+                if (!href.contains("java"))
+                    linkNum++;
+
             }
             loopElementGetSpecialContext((Element) node, contexts);
         }
     }
 
     @Override
-    public List<Block> getBlockFromDetailPage(DetailPage detailPage) {
-        return null;
-    }
-
-    private void getBlockFeatureFromBlock(Block block) {
+    public void getFeatureFromBlock(Block block, String domainInfo) {
         //初始化
         linkNum = 0;
-        if (block != null) {
+        String blockText = block.getNode().getElement().getText();
+        if (blockText != null && !blockText.equals("")) {
             getBlockContextAndContextDensity(block);
             //计算领域得分
-            // block.setDomainScore();
+            Float domainScore = graphScoreService.contextDomainScoreCalculate(block.getContext(), domainInfo);
+            block.setDomainScore(domainScore);
+        } else {
+            block.setContextDensity(0.0f);
+            block.setDomainScore(0.0f);
+            block.setLinkNumber(0);
         }
     }
 
     private void getBlockContextAndContextDensity(Block block) {
         WebElement blockBody = block.getNode().getElement();
-        String innerHTML = blockBody.getAttribute("innerHTML");
-
-        Integer codeNum = innerHTML.length() - innerHTML.replace("\n", "").length();
+        String outerHTML = blockBody.getAttribute("outerHTML");
 
 
-        Document document = Jsoup.parse(innerHTML);
+        Document document = Jsoup.parse(outerHTML);
         Element blockElement = document.body();
+        outerHTML = blockElement.outerHtml();
+        Integer codeNum = outerHTML.length() - outerHTML.replace("\n", "").length() + 1;
 
         List<String> contexts = new ArrayList<>();
         loopElementGetSpecialContext(blockElement, contexts);

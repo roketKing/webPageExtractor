@@ -1,6 +1,10 @@
 package cn.edu.seu.webPageExtractor.service;
 
+import cn.edu.seu.webPageExtractor.core.page.DetailPage;
 import cn.edu.seu.webPageExtractor.core.page.ListPage;
+import cn.edu.seu.webPageExtractor.core.page.feature.Block;
+
+import java.util.List;
 
 public interface PageDivideService {
 
@@ -9,5 +13,11 @@ public interface PageDivideService {
      * @param listPage
      */
     public void listPageDivide(ListPage listPage);
+
+    public void detailPageDivide(DetailPage detailPage);
+
+    public void detailPageParser(Block block);
+
+    public List<Block> getNotDividedBlock();
 
 }

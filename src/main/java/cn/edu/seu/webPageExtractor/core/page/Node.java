@@ -28,4 +28,11 @@ public class Node {
     public void setElement(WebElement element) {
         this.element = element;
     }
+
+    public Node(String link, WebElement element) {
+        this.link = link;
+        this.element = element;
+    }
+    public Node() {
+    }
 }

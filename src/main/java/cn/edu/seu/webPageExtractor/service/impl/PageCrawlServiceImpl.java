@@ -7,6 +7,7 @@ import cn.edu.seu.webPageExtractor.core.ListPageInfo;
 import cn.edu.seu.webPageExtractor.core.page.DetailPage;
 import cn.edu.seu.webPageExtractor.core.page.ListPage;
 import cn.edu.seu.webPageExtractor.core.page.Node;
+import cn.edu.seu.webPageExtractor.core.page.feature.Block;
 import cn.edu.seu.webPageExtractor.service.PageCrawlService;
 import cn.edu.seu.webPageExtractor.service.manage.DetailPageInfoManager;
 import cn.edu.seu.webPageExtractor.service.manage.ListPageInfoManager;
@@ -103,10 +104,15 @@ public class PageCrawlServiceImpl implements PageCrawlService {
         List<Term> termList = HanLP.segment(searchWord);
         Node node = listPage.getNode();
         Map<String,List<WebElement>> elementMap = new HashMap<>();
-        for (Term term : termList){
-            String segWord = term.word;
-            List<WebElement> elements = node.getElement().findElements(By.partialLinkText(segWord));
-            elementMap.put(segWord,elements);
+        for (int i=0;i<termList.size();i++){
+            String segWord = termList.get(i).word;
+            try{
+                List<WebElement> elements = node.getElement().findElements(By.partialLinkText(segWord));
+                elementMap.put(segWord,elements);
+            }catch (Exception e){
+                logger.error(e.toString());
+                i=i==0?0:i-1;
+            }
         }
         for (Map.Entry<String,List<WebElement>> elementMapEntry:elementMap.entrySet()){
             List<WebElement> elementList = elementMapEntry.getValue();
@@ -119,7 +125,7 @@ public class PageCrawlServiceImpl implements PageCrawlService {
                     tempResult.add(link);
                 }catch (Exception e){
                     logger.error(e.toString());
-                    i=i-1;
+                    i=i==0?0:i-1;
                 }
             }
             if (result.size()==0){
@@ -138,21 +144,23 @@ public class PageCrawlServiceImpl implements PageCrawlService {
     public DetailPage getDetailPage(String link, Integer taskId, Integer listPageId, WebDriver driver) {
         Node body = getWebPageByLink(link, driver);
         DetailPage detailPage = new DetailPage();
-        detailPage.setNode(body);
+        Block  block = new Block();
+        block.setNode(body);
+        detailPage.setBlock(block);
         detailPage.setLink(link);
         detailPage.setTaskId(taskId);
         detailPage.setTime(new Date());
         detailPage.setListId(listPageId);
         //存入本地
-        try {
-            String fileLocation = FileLocationEnum.DETAILPAGELOCATION.getLocation()
-                    + taskId + link.substring(link.length()-15) + ".html";
-            String innerText = body.getElement().getAttribute("innerHTML");
-            FileUtils.write(new File(fileLocation), innerText, "utf-8");
-            detailPage.setLocation(fileLocation);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        }
+//        try {
+//            String fileLocation = FileLocationEnum.DETAILPAGELOCATION.getLocation()
+//                    + taskId + link.substring(link.length()-15) + ".html";
+//            String innerText = body.getElement().getAttribute("innerHTML");
+//            FileUtils.write(new File(fileLocation), innerText, "utf-8");
+//            detailPage.setLocation(fileLocation);
+//        } catch (Exception e) {
+//            logger.error(e.getMessage());
+//        }
         return detailPage;
     }
 

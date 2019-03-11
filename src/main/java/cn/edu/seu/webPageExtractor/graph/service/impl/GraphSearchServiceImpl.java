@@ -1,6 +1,9 @@
 package cn.edu.seu.webPageExtractor.graph.service.impl;
 
+import cn.edu.seu.webPageExtractor.graph.core.Property;
+import cn.edu.seu.webPageExtractor.graph.core.Resource;
 import cn.edu.seu.webPageExtractor.graph.service.GraphSearchService;
+import com.google.gson.Gson;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
@@ -32,66 +35,69 @@ public class GraphSearchServiceImpl implements GraphSearchService {
     }
 
     @Override
-    public String searchByWord(String categoryName, String word) {
+    public String searchByWord(Map<String, Object> scriptParams) {
         SearchTemplateRequest request = new SearchTemplateRequest();
         request.setRequest(new SearchRequest("test"));
-
+        String highlight = "  \"highlight\":{\n" +
+                "  \t\"pre_tags\":[\"\"],\n" +
+                "  \t\"post_tags\":[\"\"],\n" +
+                "  \t\"fields\":{\n" +
+                "  \t\t\"" + scriptParams.get("field1")+
+                "\":{},\n" +
+                "  \t\t\"" + scriptParams.get("field2")+
+                "\":{}\n" +
+                "  \t}\n" +
+                "  \t\n" +
+                "  }";
         request.setScriptType(ScriptType.INLINE);
         request.setScript("{\n" +
-                "  \"query\": {\n" +
+                "\"query\": \n" +
+                "  {\n" +
                 "    \"bool\": {\n" +
                 "      \"should\": [\n" +
                 "        {\n" +
                 "          \"match\": {\n" +
-                "            \"{{field1}}\": \"{{value1}}\"\n" +
+                "          \"{{field1}}\": {\n" +
+                "          \t\t\"query\":\"{{value1}}\",\n" +
+                "          \t\t\"analyzer\":\"query_ansj\"\n" +
+                "          \t}\n" +
                 "          }\n" +
                 "        },\n" +
                 "        {\n" +
                 "          \"match\": {\n" +
-                "            \"{{field2}}\": \"{{value2}}\"\n" +
+                "            \"{{field2}}\": {\n" +
+                "          \t\t\"query\":\"{{value2}}\",\n" +
+                "          \t\t\"analyzer\":\"query_ansj\"\n" +
+                "          \t}\n" +
                 "          }\n" +
                 "        }\n" +
                 "      ]\n" +
                 "    }\n" +
-                "  },\n" +
-                "  \"highlight\":{\n" +
-                "    \"pre_tags\":[\"\"],\n" +
-                "    \"post_tags\":[\"\"],\n" +
-                "    \"fields\":{\n" +
-                "      \"categories.name\":{},\n" +
-                "      \"properties.name\":{}\n" +
-                "    }\n" +
-                "  }\n" +
-                "}"
-        );
+                "    \n" +
+                "  },\n" + highlight +
+                "  \t\n" +
+                "}");
 
-        Map<String, Object> scriptParams = new HashMap<>();
-        scriptParams.put("field1", "categories.name");
-        scriptParams.put("value1", categoryName);
-        scriptParams.put("field2", "properties.name");
-        scriptParams.put("value2", word);
         request.setScriptParams(scriptParams);
 
-        return sendRequest(request, categoryName);
+        return sendRequest(request, scriptParams);
     }
 
-    private String sendRequest(SearchTemplateRequest request, String categoryName) {
+    private String sendRequest(SearchTemplateRequest request, Map<String, Object> params) {
         String result = null;
         try {
             SearchTemplateResponse response = esClient.searchTemplate(request, RequestOptions.DEFAULT);
             if (response.getResponse() != null && response.getResponse().getHits() != null) {
+                Gson gson = new Gson();
                 for (SearchHit hit : response.getResponse().getHits()) {
+                    String source = hit.getSourceAsString();
+                    Resource resource = gson.fromJson(source, Resource.class);
                     if (hit.getHighlightFields() != null) {
-                        List<String> categorySet = parseHighlightFields(hit.getHighlightFields().get("categories.name"));
+                        String categoryName = (String) params.get("field1");
+                        List<String> categorySet = parseHighlightFields(hit.getHighlightFields().get(categoryName));
                         //领域检查...
                         if (categorySet.contains(categoryName)) {
-                            //只返回在匹配领域得分最高的
-                            List<String> propertySet = parseHighlightFields(hit.getHighlightFields().get("properties.name"));
-                            if (propertySet.size()!=0){
-                                result = propertySet.get(0);
-                                break;
-                            }
-
+                            result = getResultFromResponse(hit, params, resource);
                         }
                     }
                 }
@@ -102,8 +108,32 @@ public class GraphSearchServiceImpl implements GraphSearchService {
         return result;
     }
 
+    private String getResultFromResponse(SearchHit hit, Map<String, Object> params, Resource resource) {
+        String result = null;
+        //只返回在匹配领域得分最高的
+        String field2 = (String) params.get("field2");
+        List<String> propertySet = parseHighlightFields(hit.getHighlightFields().get(field2));
+        //是属性
+        if (propertySet.size() != 0 && field2.equals("properties.name")) {
+            result = propertySet.get(0);
+            return result;
+        } else if (propertySet.size() != 0 && field2.equals("properties.propertyValue")) {
+            //是属性值
+            result = propertySet.get(0);
+            List<Property> properties = resource.getProperties();
+            for (Property property : properties) {
+                if (property.getPropertyValue().equals(result)) {
+                    result = property.getPropertyValue();
+                    return result;
+                }
+            }
+        }
+        return result;
+    }
+
     /**
      * 对高亮的词语进行解析
+     *
      * @param field
      * @return
      */

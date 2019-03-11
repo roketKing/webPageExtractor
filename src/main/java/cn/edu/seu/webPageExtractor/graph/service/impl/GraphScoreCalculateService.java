@@ -100,7 +100,20 @@ public class GraphScoreCalculateService {
     public Float calculateWordDomainScore(String categoryName,String word){
         Float scoreResult = 0.0f;
         //先通过es搜索对应的属性
-        String propertyName = graphSearchService.searchByWord(categoryName,word);
+        Map<String,Object> scriptParams = new HashMap<>();
+
+        scriptParams.put("field1","categories.name");
+        scriptParams.put("value1",categoryName);
+        scriptParams.put("field2","properties.name");
+        scriptParams.put("value2",word);
+
+        String propertyName = graphSearchService.searchByWord(scriptParams);
+        scriptParams.put("field2","properties.propertyValue");
+        scriptParams.put("value2",word);
+        if (propertyName == null){
+            propertyName = graphSearchService.searchByWord(scriptParams);
+        }
+
         if (propertyName!=null){
             //再通过mysql查询对应属性的分值
             GraphScoreInfo graphScoreInfo = new GraphScoreInfo();

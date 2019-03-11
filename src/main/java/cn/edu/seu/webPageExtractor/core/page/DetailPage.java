@@ -10,7 +10,7 @@ public class DetailPage extends DetailPageInfo {
     /**
      * 当前详情页的节点内容
      */
-    Node node;
+    Block block;
     /**
      * 详情页的分块结果
      */
@@ -22,12 +22,13 @@ public class DetailPage extends DetailPageInfo {
     List<String> specialContext;
 
 
-    public Node getNode() {
-        return node;
+
+    public Block getBlock() {
+        return block;
     }
 
-    public void setNode(Node node) {
-        this.node = node;
+    public void setBlock(Block block) {
+        this.block = block;
     }
 
     public List<Block> getBlocks() {
