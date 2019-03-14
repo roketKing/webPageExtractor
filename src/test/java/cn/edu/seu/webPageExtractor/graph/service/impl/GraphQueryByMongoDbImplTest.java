@@ -1,6 +1,7 @@
 package cn.edu.seu.webPageExtractor.graph.service.impl;
 
 import cn.edu.seu.webPageExtractor.graph.service.GraphQueryService;
+import cn.edu.seu.webPageExtractor.graph.service.GraphScoreService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,10 @@ import static org.junit.Assert.*;
 public class GraphQueryByMongoDbImplTest {
 
     @Autowired
-    @Qualifier("graphQueryByMongoDbImpl")
     private GraphQueryService graphQueryService;
+
+    @Autowired
+    private GraphScoreService graphScoreService;
 
     @Test
     public void countAllInstanceNum() {
@@ -25,7 +28,6 @@ public class GraphQueryByMongoDbImplTest {
 
     @Test
     public void queryAllPPVofCategory() {
-        graphQueryService.queryAllPPVofCategory("手机");
     }
 
     @Test
@@ -38,5 +40,10 @@ public class GraphQueryByMongoDbImplTest {
 
     @Test
     public void querySameInstanceBetweenCategory() {
+    }
+
+    @Test
+    public void scoreTest(){
+        graphScoreService.scoreCalculate("手机");
     }
 }

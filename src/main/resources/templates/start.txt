@@ -1,0 +1,60 @@
+mongod --replSet rsEs --dbpath ~/mongodb/mongodb-osx-x86_64-4.0.6/data/db/
+ps -ef | grep elastic
+curl -X POST "localhost:9200/test/_open"
+同步命令
+mongo-connector -m localhost:27017 -t localhost:9200 -d elastic_doc_manager
+显示插件和删除插件
+GET /_nodes/plugins
+sudo bin/elasticsearch-plugin remove [pluginname]
+
+curl -XPUT 'http://localhost:9200/_all/_settings?preserve_existing=true' -H 'Content-Type: application/json' -d '{
+  "index.analysis.analyzer.default.type" : "index_ansj",
+  "index.analysis.analyzer.default_search.type" : "query_ansj"
+}'
+
+
+
+curl -XPUT 127.0.0.1:9200/testtest -d '{
+    "settings" : {
+        "number_of_shards" : 1,
+        "number_of_replicas" : 0
+
+    },
+    "mappings" : {
+        "test" : {
+            "_all" : { "enabled" : false },
+            "properties" : {
+                "name" : { "type" : "string", "analyzer" : "index_ansj", "search_analyzer" : "query_ansj" }
+            }
+        }
+    }
+}'
+
+
+
+curl -X PUT "localhost:9200/my_index" -H 'Content-Type: application/json' -d'
+{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "name":{
+      		"type":"text",
+      		"analyzer":"query_ansj"
+      	},
+      	"categories.name":{
+      		"type":"text",
+      		"analyzer":"query_ansj"
+      	},
+      	"properties.name":{
+      		"type":"text",
+      		"analyzer":"query_ansj"
+      	},
+      	"properties.propertyValue":{
+      		"type":"text",
+      		"analyzer":"query_ansj"
+      	}
+      }
+    }
+  }
+}
+'

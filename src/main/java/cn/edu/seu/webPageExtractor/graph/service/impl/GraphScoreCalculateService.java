@@ -100,7 +100,7 @@ public class GraphScoreCalculateService {
     public Float calculateWordDomainScore(String categoryName,String word){
         Float scoreResult = 0.0f;
         //先通过es搜索对应的属性
-        Map<String,Object> scriptParams = new HashMap<>();
+        Map<String,String> scriptParams = new HashMap<>();
 
         scriptParams.put("field1","categories.name");
         scriptParams.put("value1",categoryName);

@@ -11,6 +11,6 @@ public interface GraphSearchService {
      * @param scriptParams
      * @return
      */
-    public String searchByWord(Map<String,Object> scriptParams);
+    public String searchByWord(Map<String,String> scriptParams);
 
 }

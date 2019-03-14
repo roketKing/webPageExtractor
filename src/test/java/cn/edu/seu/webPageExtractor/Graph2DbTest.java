@@ -1,5 +1,6 @@
 package cn.edu.seu.webPageExtractor;
 
+import cn.edu.seu.webPageExtractor.graph.service.GraphQueryService;
 import cn.edu.seu.webPageExtractor.graph.service.GraphScoreService;
 import cn.edu.seu.webPageExtractor.service.manage.DbTransferManager;
 import cn.edu.seu.webPageExtractor.service.manage.TripleManager;
@@ -68,6 +69,15 @@ public class Graph2DbTest {
     @Test
     public void graphCalculate() {
         graphScoreService.scoreCalculate("手机");
+    }
+
+
+    @Autowired
+    private GraphQueryService graphQueryService;
+    @Test
+    public void propertyQuery(){
+        graphQueryService.queryAllPropertyOfCategory("手机");
+        System.out.println("good");
     }
 
     @Test

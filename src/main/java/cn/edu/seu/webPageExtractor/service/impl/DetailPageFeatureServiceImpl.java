@@ -95,6 +95,7 @@ public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
             Float domainScore = graphScoreService.contextDomainScoreCalculate(block.getContext(), domainInfo);
             block.setDomainScore(domainScore);
         } else {
+            block.setContextStrLength(0);
             block.setContextDensity(0.0f);
             block.setDomainScore(0.0f);
             block.setLinkNumber(0);
@@ -110,6 +111,7 @@ public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
         Element blockElement = document.body();
         outerHTML = blockElement.outerHtml();
         Integer codeNum = outerHTML.length() - outerHTML.replace("\n", "").length() + 1;
+        Integer blockSize =  blockBody.getSize().getHeight()*blockBody.getSize().getWidth();
 
         List<String> contexts = new ArrayList<>();
         loopElementGetSpecialContext(blockElement, contexts);
@@ -117,9 +119,10 @@ public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
         for (String context : contexts) {
             contextNum = contextNum + context.length();
         }
+        block.setContextStrLength(contextNum);
         block.setContext(contexts);
         block.setLinkNumber(linkNum);
-        block.setContextDensity((float) contextNum / codeNum);
+        block.setContextDensity((float) contextNum / blockSize);
     }
 
     /**

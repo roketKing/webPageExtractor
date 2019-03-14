@@ -17,6 +17,11 @@ public class Block {
      * 分块中的文本
      */
     List<String> context;
+
+    /**
+     * 分块中文本的数量
+     */
+    Integer contextStrLength;
     /**
      * 分块中的领域得分
      */
@@ -193,5 +198,13 @@ public class Block {
 
     public void setVirtualTextNode(Boolean virtualTextNode) {
         this.virtualTextNode = virtualTextNode;
+    }
+
+    public Integer getContextStrLength() {
+        return contextStrLength;
+    }
+
+    public void setContextStrLength(Integer contextStrLength) {
+        this.contextStrLength = contextStrLength;
     }
 }
