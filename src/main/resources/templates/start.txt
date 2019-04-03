@@ -1,5 +1,8 @@
 mongod --replSet rsEs --dbpath ~/mongodb/mongodb-osx-x86_64-4.0.6/data/db/
 ps -ef | grep elastic
+find ./ -name .DS_Store
+rm .//.DS_Store
+rm .//plugins/.DS_Store
 curl -X POST "localhost:9200/test/_open"
 同步命令
 mongo-connector -m localhost:27017 -t localhost:9200 -d elastic_doc_manager
