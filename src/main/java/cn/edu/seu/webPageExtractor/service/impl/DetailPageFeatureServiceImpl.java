@@ -88,8 +88,8 @@ public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
     public void getFeatureFromBlock(Block block, String domainInfo) {
         //初始化
         linkNum = 0;
-        String blockText = block.getNode().getElement().getText();
-        if (blockText != null && !blockText.equals("")) {
+        String blockText = block.getNode().getElement().getAttribute("innerText");
+        if (blockText != null && !blockText.replace(" ","").equals("")) {
             getBlockContextAndContextDensity(block);
             //计算领域得分
             Float domainScore = graphScoreService.contextDomainScoreCalculate(block.getContext(), domainInfo);

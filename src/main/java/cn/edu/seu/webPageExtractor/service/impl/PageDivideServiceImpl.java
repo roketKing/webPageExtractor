@@ -21,6 +21,10 @@ public class PageDivideServiceImpl implements PageDivideService {
         return notDividedBlock;
     }
 
+    /**
+     * 获取列表页的功能块
+     * @param listPage
+     */
     @Override
     public void listPageDivide(ListPage listPage) {
         WebElement body = listPage.getNode().getElement();
@@ -37,6 +41,20 @@ public class PageDivideServiceImpl implements PageDivideService {
         }
         //只有一个大小则返回，有多个大小的取最大区间继续分割
         if (sizeSet.size() == 1) {
+            Block block = new Block();
+            Node node = new Node();
+            node.setElement(body);
+            block.setNode(node);
+            listPage.setBlock(block);
+            List<Block> childBlocks = new ArrayList<>();
+            for (int i = 0; i < childs.size(); i++){
+                Block tempBlock = new Block();
+                Node tempNode = new Node();
+                tempNode.setElement(body);
+                tempBlock.setNode(node);
+                childBlocks.add(tempBlock);
+            }
+            listPage.setChildBlocks(childBlocks);
             return;
         }
 
@@ -70,6 +88,10 @@ public class PageDivideServiceImpl implements PageDivideService {
         getBlcokFeature(block);
         //获取孩子节点
         WebElement currentEle = block.getNode().getElement();
+        //just for test
+        if (currentEle.findElements(By.className("tab-con")).size()!=0){
+            System.out.println("alarm find it!!");
+        }
         List<WebElement> childElements = currentEle.findElements(By.xpath("./*"));
         if (block.getBlocks() == null) {
             List<Block> blockList = new ArrayList<>();
@@ -83,6 +105,7 @@ public class PageDivideServiceImpl implements PageDivideService {
             }
             Block tempBlock = new Block();
             tempBlock.setNode(new Node(null, childElement));
+            tempBlock.setParentBlock(block);
             getBlcokFeature(tempBlock);
             block.getBlocks().add(tempBlock);
         }

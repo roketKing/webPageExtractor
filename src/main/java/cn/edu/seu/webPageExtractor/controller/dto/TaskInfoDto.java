@@ -7,6 +7,7 @@ import java.util.List;
 public class TaskInfoDto extends TaskInfo {
     private String stateName;
     private String dateString;
+    private String typeString;
     /**
      * 任务级别的关键词
      */
@@ -26,5 +27,21 @@ public class TaskInfoDto extends TaskInfo {
 
     public void setDateString(String dateString) {
         this.dateString = dateString;
+    }
+
+    public String getTypeString() {
+        return typeString;
+    }
+
+    public void setTypeString(String typeString) {
+        this.typeString = typeString;
+    }
+
+    public List<String> getTaskContext() {
+        return taskContext;
+    }
+
+    public void setTaskContext(List<String> taskContext) {
+        this.taskContext = taskContext;
     }
 }

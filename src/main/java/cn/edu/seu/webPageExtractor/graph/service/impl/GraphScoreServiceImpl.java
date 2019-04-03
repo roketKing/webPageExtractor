@@ -2,6 +2,7 @@ package cn.edu.seu.webPageExtractor.graph.service.impl;
 
 import cn.edu.seu.webPageExtractor.graph.service.GraphQueryService;
 import cn.edu.seu.webPageExtractor.graph.service.GraphScoreService;
+import cn.edu.seu.webPageExtractor.service.repository.GraphScoreRepository;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
 import org.ansj.splitWord.analysis.IndexAnalysis;
@@ -21,6 +22,8 @@ public class GraphScoreServiceImpl implements GraphScoreService {
     private GraphQueryService graphQueryService;
     @Autowired
     private GraphScoreCalculateService graphScoreCalculateService;
+    @Autowired
+    private GraphScoreRepository graphScoreRepository;
 
     @Override
     public void scoreCalculate(String categoryName) {
@@ -51,7 +54,7 @@ public class GraphScoreServiceImpl implements GraphScoreService {
     }
 
     @Override
-    public Float contextDomainScoreCalculate(List<String> contexts, String domainName) {
+    public Float contextDomainScoreCalculateWithSegWord(List<String> contexts, String domainName) {
         Float sumResult = 0.0f;
         Integer scoreWordNum = 0;
         for (String context : contexts) {
@@ -68,10 +71,26 @@ public class GraphScoreServiceImpl implements GraphScoreService {
                     }
                 }
             }
-            sumResult = sumResult + qResult;
+            if (qResult > 0.01)
+                sumResult = sumResult + qResult;
             logger.info("context is " + context + " score is " + qResult);
         }
 
-        return scoreWordNum==0?0:sumResult/scoreWordNum;
+        return scoreWordNum == 0 ? 0 : sumResult / scoreWordNum;
+    }
+
+    @Override
+    public Float contextDomainScoreCalculate(List<String> contexts, String domainName) {
+        Float sumResult = 0.0f;
+        for (String context : contexts) {
+            context = context.replace(domainName, "");
+            if (!context.contains("div")) {
+                Float qResult = graphScoreCalculateService.calculateWordDomainScore(domainName, context);
+                sumResult = sumResult + qResult;
+                logger.info("context is " + context + " score is " + qResult);
+            }
+        }
+
+        return sumResult;
     }
 }

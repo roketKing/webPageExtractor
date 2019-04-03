@@ -12,6 +12,7 @@ public class TaskInfo {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Integer id;
     private String name;
+    private Integer type;
     private Date time;
     private String domain;
     private String keyword;
@@ -72,5 +73,13 @@ public class TaskInfo {
 
     public void setState(Integer state) {
         this.state = state;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 }

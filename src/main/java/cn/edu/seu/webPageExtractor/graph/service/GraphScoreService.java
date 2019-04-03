@@ -7,4 +7,6 @@ public interface GraphScoreService {
 
     public Float contextDomainScoreCalculate(List<String> context,String domainName);
 
+    public Float contextDomainScoreCalculateWithSegWord(List<String> contexts, String domainName);
+
 }

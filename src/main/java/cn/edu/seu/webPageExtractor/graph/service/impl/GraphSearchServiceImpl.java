@@ -16,6 +16,8 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -26,6 +28,7 @@ import java.util.Map;
 
 @Service
 public class GraphSearchServiceImpl implements GraphSearchService {
+    private Logger logger = LoggerFactory.getLogger(GraphSearchServiceImpl.class);
     private RestHighLevelClient esClient;
 
     @PostConstruct
@@ -104,6 +107,7 @@ public class GraphSearchServiceImpl implements GraphSearchService {
         //是属性
         if (propertySet.size() != 0 && field2.equals("properties.name")) {
             result = propertySet.get(0);
+            logger.info("search word is "+ params.get(field2) +" mapping word is " + result);
             return result;
         } else if (propertySet.size() != 0 && field2.equals("properties.propertyValue")) {
             //是属性值
@@ -111,6 +115,7 @@ public class GraphSearchServiceImpl implements GraphSearchService {
             List<Property> properties = resource.getProperties();
             for (Property property : properties) {
                 if (property.getPropertyValue().equals(result)) {
+                    logger.info("search word is "+ params.get(field2) +" mapping word is " + result+" property name is "+ property.getName());
                     result = property.getName();
                     return result;
                 }

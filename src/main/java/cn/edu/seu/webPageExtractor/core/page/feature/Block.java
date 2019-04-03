@@ -80,6 +80,8 @@ public class Block {
      */
     private Boolean virtualTextNode;
 
+    private Float scoreResult;
+
     public Integer getLinkNumber() {
         return linkNumber;
     }
@@ -206,5 +208,13 @@ public class Block {
 
     public void setContextStrLength(Integer contextStrLength) {
         this.contextStrLength = contextStrLength;
+    }
+
+    public Float getScoreResult() {
+        return scoreResult;
+    }
+
+    public void setScoreResult(Float scoreResult) {
+        this.scoreResult = scoreResult;
     }
 }

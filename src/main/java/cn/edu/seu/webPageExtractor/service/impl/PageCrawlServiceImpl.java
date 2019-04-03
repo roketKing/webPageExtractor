@@ -99,10 +99,10 @@ public class PageCrawlServiceImpl implements PageCrawlService {
     }
 
     @Override
-    public List<String> getListPageALink(String searchWord, ListPage listPage) {
+    public void getListPageALink(String searchWord, Block block) {
         List<String> result = new ArrayList<>();
         List<Term> termList = HanLP.segment(searchWord);
-        Node node = listPage.getNode();
+        Node node = block.getNode();
         Map<String,List<WebElement>> elementMap = new HashMap<>();
         for (int i=0;i<termList.size();i++){
             String segWord = termList.get(i).word;
@@ -135,8 +135,7 @@ public class PageCrawlServiceImpl implements PageCrawlService {
             }
         }
 
-        return result;
-
+        node.setLink(result.get(0));
 
     }
 

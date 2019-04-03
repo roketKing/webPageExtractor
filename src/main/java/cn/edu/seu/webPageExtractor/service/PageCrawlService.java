@@ -5,6 +5,7 @@ package cn.edu.seu.webPageExtractor.service;
 import cn.edu.seu.webPageExtractor.core.page.DetailPage;
 import cn.edu.seu.webPageExtractor.core.page.ListPage;
 import cn.edu.seu.webPageExtractor.core.page.Node;
+import cn.edu.seu.webPageExtractor.core.page.feature.Block;
 import org.openqa.selenium.WebDriver;
 
 import java.util.List;
@@ -33,10 +34,10 @@ public interface PageCrawlService {
     /**
      * 获取列表页关键词相关的A标签的链接
      * @param searchWord
-     * @param listPage
+     * @param block
      * @return
      */
-    public List<String> getListPageALink(String searchWord, ListPage listPage);
+    public void getListPageALink(String searchWord, Block block);
 
     /**
      * 获取详情页的信息

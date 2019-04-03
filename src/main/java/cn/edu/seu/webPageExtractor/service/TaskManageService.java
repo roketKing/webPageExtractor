@@ -17,4 +17,10 @@ public interface TaskManageService {
 
     public List<String> taskContextCalculate(List<DetailPage> detailPages);
 
+    public void listPageExtraTask(TaskInfoDto taskInfoDto);
+
+    public void detailPageExtraTask(TaskInfoDto taskInfoDto);
+
+    public void domainTrainTask(TaskInfoDto taskInfoDto);
+
 }
