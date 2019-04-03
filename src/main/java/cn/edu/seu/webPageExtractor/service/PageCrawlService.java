@@ -19,10 +19,6 @@ public interface PageCrawlService {
      * @return
      */
     public WebDriver getDriver();
-    /**
-     * 获取一个网页的所有element
-     */
-    public Node getWebPageByLink(String link,WebDriver driver);
 
     /**
      * 获取搜索结果页的集合，需要翻页

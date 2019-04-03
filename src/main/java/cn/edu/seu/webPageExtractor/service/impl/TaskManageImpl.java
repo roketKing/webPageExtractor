@@ -8,11 +8,7 @@ import cn.edu.seu.webPageExtractor.core.page.DetailPage;
 import cn.edu.seu.webPageExtractor.core.page.ListPage;
 import cn.edu.seu.webPageExtractor.core.page.feature.Block;
 import cn.edu.seu.webPageExtractor.graph.service.GraphScoreService;
-import cn.edu.seu.webPageExtractor.service.DetailPageFeatureService;
-import cn.edu.seu.webPageExtractor.service.PageCrawlService;
-import cn.edu.seu.webPageExtractor.service.PageDivideService;
-import cn.edu.seu.webPageExtractor.service.TaskManageService;
-import cn.edu.seu.webPageExtractor.service.manage.DetailPageInfoManager;
+import cn.edu.seu.webPageExtractor.service.*;
 import cn.edu.seu.webPageExtractor.service.manage.ExtraResultManager;
 import cn.edu.seu.webPageExtractor.service.repository.TaskRepository;
 import org.openqa.selenium.WebDriver;
@@ -41,13 +37,16 @@ public class TaskManageImpl implements TaskManageService {
     private GraphScoreService graphScoreService;
 
     @Autowired
-    private DetailPageInfoManager detailPageInfoManager;
-
-    @Autowired
     private DetailPageFeatureService detailPageFeatureService;
 
     @Autowired
-    private ExtraResultManager extraResultManager;
+    private PageDeNoiseService pageDeNoiseService;
+
+    @Autowired
+    private PageExtraService pageExtraService;
+
+    @Autowired
+    private PageFeatureGenerateService pageFeatureGenerateService;
 
     @Override
     public TaskInfoDto createATask(TaskInfo taskInfo) {
@@ -127,102 +126,20 @@ public class TaskManageImpl implements TaskManageService {
     @Async
     public void listPageExtraTask(TaskInfoDto taskInfoDto) {
         WebDriver driver = pageCrawlService.getDriver();
-        String keyword = taskInfoDto.getKeyword();
         List<ListPage> listPages = pageCrawlService.getListPage(taskInfoDto.getLink(), taskInfoDto.getId(), driver, 1);
-
-        List<DetailPage> correctDetailPage = new ArrayList<>();
-        List<DetailPage> notCorrectDetailPages = new ArrayList<>();
 
         for (ListPage listPage : listPages) {
             //分割列表页
             pageDivideService.listPageDivide(listPage);
-            List<Block> childBlocks = listPage.getChildBlocks();
-            for (Block block : childBlocks) {
-                //获取详情页链接
-                pageCrawlService.getListPageALink(keyword, block);
-                String link = block.getNode().getLink();
-                //获取详情页特征
-                DetailPage detailPage = pageCrawlService.getDetailPage(link, taskInfoDto.getId(), listPage.getId(), driver);
-                List<String> contexts = detailPageFeatureService.getSpecialTagContextFeature(detailPage);
-                block.setContext(contexts);
-                Float contextDomainScore = graphScoreService.contextDomainScoreCalculate(contexts, taskInfoDto.getDomain());
-                block.setDomainScore(contextDomainScore);
-            }
-
-            //排序，获得无噪声的block，然后获取关键词
-            Map<String, Integer> keyWordMap = new HashMap<>();
-            childBlocks.sort(new Comparator<Block>() {
-                @Override
-                public int compare(Block o1, Block o2) {
-                    Float res = o1.getDomainScore() - o2.getDomainScore();
-                    if (res > 0) {
-                        return 1;
-                    } else if (res < 0) {
-                        return -1;
-                    } else {
-                        return 1;
-                    }
-                }
-            });
-            Integer endNum = childBlocks.size() - 1;
-            if (childBlocks.size() > 10) {
-                endNum = 10;
-            }
-            List<Block> corrertBlock = new ArrayList<>();
-            for (Block block : childBlocks.subList(0, endNum)) {
-                List<String> contexts = block.getContext();
-                for (String con : contexts) {
-                    if (keyWordMap.containsKey(con)) {
-                        Integer count = keyWordMap.get(con);
-                        keyWordMap.put(con, count + 1);
-                    } else {
-                        keyWordMap.put(con, 1);
-                    }
-                }
-                corrertBlock.add(block);
-            }
-
-            //获取前10个关键字
-            List<Map.Entry<String, Integer>> keyWordMapList = new ArrayList<>(keyWordMap.entrySet());
-            keyWordMapList.sort(new Comparator<Map.Entry<String, Integer>>() {
-                @Override
-                public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-                    return o2.getValue() - o1.getValue();
-                }
-            });
-
-            List<String> keyWordList = new ArrayList<>();
-            for (Map.Entry<String, Integer> entry : keyWordMapList.subList(0, 9)) {
-                keyWordList.add(entry.getKey());
-            }
-
-            for (Block block : childBlocks.subList(endNum, childBlocks.size() - 1)) {
-                List<String> contexts = block.getContext();
-                Integer initContextSize = contexts.size();
-                contexts.removeAll(keyWordList);
-                if (initContextSize - contexts.size() > 10) {
-                    corrertBlock.add(block);
-                }
-            }
-            List<ExtraResultInfo> infos = new ArrayList<>();
-
-            for (Block block : corrertBlock) {
-                List<String> contexts = block.getContext();
-                StringBuilder temp =new StringBuilder();
-                contexts.forEach(con->{
-                    temp.append(con);
-                    temp.append("\n");
-                });
-                ExtraResultInfo extraResultInfo = new ExtraResultInfo();
-                extraResultInfo.setTaskId(taskInfoDto.getId().toString());
-                extraResultInfo.setContext(temp.toString());
-                extraResultInfo.setTaskDomain(taskInfoDto.getDomain());
-                infos.add(extraResultInfo);
-            }
-
-            extraResultManager.saveResult(infos);
+            //获取特征
+            detailPageFeatureService.getListPageBlockFeature(listPage, taskInfoDto);
+            //页面降噪
+            List<Block> correctBlock = pageDeNoiseService.listPageDeNoise(listPage);
+            //页面抽取
+            pageExtraService.listPageExtra(correctBlock, taskInfoDto);
         }
     }
+
 
     @Override
     @Async
@@ -230,68 +147,14 @@ public class TaskManageImpl implements TaskManageService {
         WebDriver driver = pageCrawlService.getDriver();
         DetailPage detailPage = pageCrawlService.getDetailPage(taskInfoDto.getLink(), 11, 11, driver);
         driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+        //分割网页
         pageDivideService.detailPageDivide(detailPage);
-        List<Block> blocks = pageDivideService.getNotDividedBlock();
-
-        for (int i = 0; i < blocks.size(); i++) {
-            long start = System.currentTimeMillis();
-            detailPageFeatureService.getFeatureFromBlock(blocks.get(i), "手机");
-            System.out.println("已经进行到" + i + "花费了" + (System.currentTimeMillis() - start));
-        }
-
-        //block特征得分计算
-        List<Block> notZeroBlocks = new ArrayList<>();
-        List<Float> wordDensityList = new ArrayList<>();
-        for (Block block : blocks) {
-            if (block.getDomainScore() != 0) {
-                wordDensityList.add(block.getContextDensity());
-                notZeroBlocks.add(block);
-            }
-        }
-
-        Float maxWordDensity = Collections.max(wordDensityList);
-        Float minWordDensity = Collections.min(wordDensityList);
-        Float gradient = 1 / maxWordDensity - minWordDensity;
-
-        for (Block block : notZeroBlocks) {
-            if (!block.getContextDensity().isInfinite()) {
-                Float density = gradient * (block.getContextDensity() - minWordDensity);
-                Float res = block.getDomainScore() * (1 / density + 1 / block.getLinkNumber());
-                block.setScoreResult(res);
-            }
-        }
-
-        //block排序
-        notZeroBlocks.sort(new Comparator<Block>() {
-            @Override
-            public int compare(Block o1, Block o2) {
-                float res = o1.getScoreResult() - o2.getScoreResult();
-                if (res > 0) {
-                    return 1;
-                } else if (res < 0) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-
-            }
-        });
-
-        List<ExtraResultInfo> infos = new ArrayList<>();
-        List<String> context = blocks.get(0).getContext();
-        StringBuilder contextStr = new StringBuilder();
-        for (String temp : context) {
-            contextStr.append(temp);
-            contextStr.append("\n");
-        }
-
-        ExtraResultInfo extraResultInfo = new ExtraResultInfo();
-        extraResultInfo.setTaskId(taskInfoDto.getId().toString());
-        extraResultInfo.setContext(contextStr.toString());
-        extraResultInfo.setTaskDomain(taskInfoDto.getDomain());
-        infos.add(extraResultInfo);
-
-        extraResultManager.saveResult(infos);
+        //获取特征
+        pageFeatureGenerateService.detailPageFeatureGenerate(detailPage, taskInfoDto.getDomain());
+        //降噪
+        Block block = pageDeNoiseService.detailPageDeNoise(detailPage);
+        //页面抽取
+        pageExtraService.detailPageExtra(block,taskInfoDto);
     }
 
     @Override

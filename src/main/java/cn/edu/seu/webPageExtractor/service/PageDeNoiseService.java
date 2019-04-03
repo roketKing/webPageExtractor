@@ -6,18 +6,18 @@ import cn.edu.seu.webPageExtractor.core.page.feature.Block;
 
 import java.util.List;
 
-public interface PageDivideService {
-
+public interface PageDeNoiseService {
     /**
-     * 获取搜索结果页的分块结果
+     * 列表页降噪
      * @param listPage
+     * @return
      */
-    public void listPageDivide(ListPage listPage);
+    public List<Block> listPageDeNoise(ListPage listPage);
 
     /**
-     * 获取详情页的分块结果
+     * 详情页降噪
      * @param detailPage
+     * @return
      */
-    public void detailPageDivide(DetailPage detailPage);
-
+    public Block detailPageDeNoise(DetailPage detailPage);
 }

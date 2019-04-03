@@ -1,6 +1,8 @@
 package cn.edu.seu.webPageExtractor.service;
 
+import cn.edu.seu.webPageExtractor.controller.dto.TaskInfoDto;
 import cn.edu.seu.webPageExtractor.core.page.DetailPage;
+import cn.edu.seu.webPageExtractor.core.page.ListPage;
 import cn.edu.seu.webPageExtractor.core.page.feature.Block;
 import org.openqa.selenium.WebDriver;
 
@@ -20,6 +22,9 @@ public interface DetailPageFeatureService {
      * @param detailPage
      */
     public void getFeatureFromBlock(Block block,String domainInfo);
+
+
+    public void getListPageBlockFeature(ListPage listPage, TaskInfoDto taskInfoDto);
 
 
 

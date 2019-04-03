@@ -43,8 +43,7 @@ public class PageCrawlServiceImpl implements PageCrawlService {
         return driver;
     }
 
-    @Override
-    public Node getWebPageByLink(String link, WebDriver driver) {
+   private Node getWebPageByLink(String link, WebDriver driver) {
         try{
             driver.get(link);
             Node node = new Node();

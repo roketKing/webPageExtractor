@@ -17,10 +17,6 @@ import java.util.*;
 public class PageDivideServiceImpl implements PageDivideService {
     private List<Block> notDividedBlock = new ArrayList<>();
 
-    public List<Block> getNotDividedBlock() {
-        return notDividedBlock;
-    }
-
     /**
      * 获取列表页的功能块
      * @param listPage
@@ -75,23 +71,20 @@ public class PageDivideServiceImpl implements PageDivideService {
 
     @Override
     public void detailPageDivide(DetailPage detailPage) {
+        //获取body
         Block block = detailPage.getBlock();
-
+        //对body进行分块
         blockDivide(block);
-        //获取水平分割
-        //获取垂直分割
+        //分块结果回传
+        detailPage.setBlocks(notDividedBlock);
     }
 
 
     private void blockDivide(Block block) {
         //获取当前节点信息
-        getBlcokFeature(block);
+        getBlockFeature(block);
         //获取孩子节点
         WebElement currentEle = block.getNode().getElement();
-        //just for test
-        if (currentEle.findElements(By.className("tab-con")).size()!=0){
-            System.out.println("alarm find it!!");
-        }
         List<WebElement> childElements = currentEle.findElements(By.xpath("./*"));
         if (block.getBlocks() == null) {
             List<Block> blockList = new ArrayList<>();
@@ -106,10 +99,12 @@ public class PageDivideServiceImpl implements PageDivideService {
             Block tempBlock = new Block();
             tempBlock.setNode(new Node(null, childElement));
             tempBlock.setParentBlock(block);
-            getBlcokFeature(tempBlock);
+            getBlockFeature(tempBlock);
             block.getBlocks().add(tempBlock);
         }
+        //判断是否需要分割
         applyVipsRules(block, 140000);
+
         if (block.getDivide()) {
             //继续获取其子节点,并分割
             for (Block childBlock : block.getBlocks()) {
@@ -120,46 +115,7 @@ public class PageDivideServiceImpl implements PageDivideService {
         }
     }
 
-    @Override
-    public void detailPageParser(Block block) {
-        WebElement currentEle = block.getNode().getElement();
-
-        if (PageDivideRuleUtil.isInLineNode(currentEle)) {
-            block.setInlineNode(true);
-        } else {
-            block.setLineBreakNode(false);
-        }
-        //block.setTextNode(PageDivideRuleUtil.isTextNode(currentEle));
-        block.setValidnode(PageDivideRuleUtil.isValidNode(currentEle));
-        //block.setVirtualTextNode(PageDivideRuleUtil.isVirtualTextNode(currentEle));
-
-        List<WebElement> childElements = currentEle.findElements(By.xpath("./*"));
-        if (childElements.size() == 0) {
-            return;
-        }
-        for (WebElement childElement : childElements) {
-            if (childElement.getTagName().toLowerCase().equals("script")
-                    || childElement.getTagName().toLowerCase().equals("style")) {
-                continue;
-            }
-            Block tempBlock = new Block();
-            tempBlock.setNode(new Node(null, childElement));
-            tempBlock.setParentBlock(block);
-
-            if (block.getBlocks() == null) {
-                List<Block> blockList = new ArrayList<>();
-                blockList.add(tempBlock);
-                block.setBlocks(blockList);
-            } else {
-                block.getBlocks().add(tempBlock);
-            }
-
-            detailPageParser(tempBlock);
-        }
-
-    }
-
-    private void getBlcokFeature(Block block) {
+    private void getBlockFeature(Block block) {
         WebElement currentEle = block.getNode().getElement();
 
         if (PageDivideRuleUtil.isInLineNode(currentEle)) {

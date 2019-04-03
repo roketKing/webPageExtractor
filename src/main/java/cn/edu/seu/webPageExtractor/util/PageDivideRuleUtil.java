@@ -150,28 +150,22 @@ public class PageDivideRuleUtil {
         return false;
     }
 
-    public static boolean isVirtualTextNode(WebElement ele){
-        if (isInLineNode(ele)){
+    public static boolean isVirtualTextNode(WebElement ele) {
+        if (isInLineNode(ele)) {
             List<WebElement> childElements = ele.findElements(By.xpath("./*"));
             Integer textNodeSize = 0;
-            for (WebElement childEle :childElements){
-                if (isTextNode(childEle)){
+            for (WebElement childEle : childElements) {
+                if (isTextNode(childEle)) {
                     textNodeSize++;
-                }else if (isVirtualTextNode(childEle)){
+                } else if (isVirtualTextNode(childEle)) {
                     textNodeSize++;
                 }
             }
-            if (textNodeSize == childElements.size()){
+            if (textNodeSize == childElements.size()) {
                 return true;
             }
         }
         return false;
     }
-
-
-
-
-
-
 
 }

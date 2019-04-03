@@ -1,14 +1,18 @@
 package cn.edu.seu.webPageExtractor.service.impl;
 
+import cn.edu.seu.webPageExtractor.controller.dto.TaskInfoDto;
 import cn.edu.seu.webPageExtractor.core.page.DetailPage;
+import cn.edu.seu.webPageExtractor.core.page.ListPage;
 import cn.edu.seu.webPageExtractor.core.page.feature.Block;
 import cn.edu.seu.webPageExtractor.graph.service.GraphScoreService;
 import cn.edu.seu.webPageExtractor.service.DetailPageFeatureService;
+import cn.edu.seu.webPageExtractor.service.PageCrawlService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +26,8 @@ import java.util.Set;
 public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
     @Autowired
     private GraphScoreService graphScoreService;
+    @Autowired
+    private PageCrawlService pageCrawlService;
     private Integer linkNum = 0;
 
     @Override
@@ -102,6 +108,23 @@ public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
         }
     }
 
+    @Override
+    public void getListPageBlockFeature(ListPage listPage, TaskInfoDto taskInfoDto) {
+        WebDriver driver = pageCrawlService.getDriver();
+        List<Block> childBlocks = listPage.getChildBlocks();
+        for (Block block : childBlocks) {
+            //获取详情页链接
+            pageCrawlService.getListPageALink(taskInfoDto.getKeyword(), block);
+            String link = block.getNode().getLink();
+            //获取详情页特征
+            DetailPage detailPage = pageCrawlService.getDetailPage(link, taskInfoDto.getId(), listPage.getId(), driver);
+            List<String> contexts = getSpecialTagContextFeature(detailPage);
+            block.setContext(contexts);
+            Float contextDomainScore = graphScoreService.contextDomainScoreCalculate(contexts, taskInfoDto.getDomain());
+            block.setDomainScore(contextDomainScore);
+        }
+    }
+
     private void getBlockContextAndContextDensity(Block block) {
         WebElement blockBody = block.getNode().getElement();
         String outerHTML = blockBody.getAttribute("outerHTML");
@@ -123,26 +146,5 @@ public class DetailPageFeatureServiceImpl implements DetailPageFeatureService {
         block.setContext(contexts);
         block.setLinkNumber(linkNum);
         block.setContextDensity((float) contextNum / blockSize);
-    }
-
-    /**
-     * 计算一个Block中所有的节点的数量
-     * 所有A标签的节点数量
-     *
-     * @param body
-     */
-
-
-    private void loopBlock(Node body) {
-        List<Node> childs = body.childNodes();
-        if (childs.size() == 0) {
-            return;
-        }
-        for (Node node : childs) {
-            if (node.nodeName().equals("A")) {
-                linkNum++;
-            }
-            loopBlock(node);
-        }
     }
 }
