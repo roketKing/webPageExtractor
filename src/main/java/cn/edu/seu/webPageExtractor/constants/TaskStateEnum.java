@@ -3,6 +3,7 @@ package cn.edu.seu.webPageExtractor.constants;
 public enum TaskStateEnum {
     NEWTASK(10,"新任务"),
     PROCESTASK(20,"进行中任务"),
+    INNORMALTASK(30,"异常的任务"),
     FINISHTASK(40,"任务完成");
 
     private Integer state;

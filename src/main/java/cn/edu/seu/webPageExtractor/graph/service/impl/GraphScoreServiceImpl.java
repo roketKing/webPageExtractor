@@ -1,5 +1,6 @@
 package cn.edu.seu.webPageExtractor.graph.service.impl;
 
+import cn.edu.seu.webPageExtractor.core.page.feature.Context;
 import cn.edu.seu.webPageExtractor.graph.service.GraphQueryService;
 import cn.edu.seu.webPageExtractor.graph.service.GraphScoreService;
 import cn.edu.seu.webPageExtractor.service.repository.GraphScoreRepository;
@@ -53,39 +54,39 @@ public class GraphScoreServiceImpl implements GraphScoreService {
         }
     }
 
-    @Override
-    public Float contextDomainScoreCalculateWithSegWord(List<String> contexts, String domainName) {
-        Float sumResult = 0.0f;
-        Integer scoreWordNum = 0;
-        for (String context : contexts) {
-            //进行分词，对每个词进行搜索
-            Result segResult = IndexAnalysis.parse(context);
-            Float qResult = 0.0f;
-            for (Term term : segResult.getTerms()) {
-                String termName = term.getName().replace(domainName, "");
-                if (termName.length() > 1 && !term.getNatureStr().equals("m")) {
-                    Float tempResult = graphScoreCalculateService.calculateWordDomainScore(domainName, termName);
-                    if (tempResult > 0) {
-                        scoreWordNum++;
-                        qResult = qResult + tempResult;
-                    }
-                }
-            }
-            if (qResult > 0.01)
-                sumResult = sumResult + qResult;
-            logger.info("context is " + context + " score is " + qResult);
-        }
+//    @Override
+//    public Float contextDomainScoreCalculateWithSegWord(List<String> contexts, String domainName) {
+//        Float sumResult = 0.0f;
+//        Integer scoreWordNum = 0;
+//        for (String context : contexts) {
+//            //进行分词，对每个词进行搜索
+//            Result segResult = IndexAnalysis.parse(context);
+//            Float qResult = 0.0f;
+//            for (Term term : segResult.getTerms()) {
+//                String termName = term.getName().replace(domainName, "");
+//                if (termName.length() > 1 && !term.getNatureStr().equals("m")) {
+//                    Float tempResult = graphScoreCalculateService.calculateWordDomainScore(domainName, termName);
+//                    if (tempResult > 0) {
+//                        scoreWordNum++;
+//                        qResult = qResult + tempResult;
+//                    }
+//                }
+//            }
+//            if (qResult > 0.01)
+//                sumResult = sumResult + qResult;
+//            logger.info("context is " + context + " score is " + qResult);
+//        }
+//
+//        return scoreWordNum == 0 ? 0 : sumResult / scoreWordNum;
+//    }
 
-        return scoreWordNum == 0 ? 0 : sumResult / scoreWordNum;
-    }
-
     @Override
-    public Float contextDomainScoreCalculate(List<String> contexts, String domainName) {
+    public Float contextDomainScoreCalculate(List<Context> contexts, String domainName) {
         Float sumResult = 0.0f;
-        for (String context : contexts) {
-            context = context.replace(domainName, "");
-            if (!context.contains("div")) {
-                Float qResult = graphScoreCalculateService.calculateWordDomainScore(domainName, context);
+        for (Context context : contexts) {
+            String tempStr = context.getStr().replace(domainName, "");
+            if (!tempStr.contains("div")) {
+                Float qResult = graphScoreCalculateService.calculateWordDomainScore(domainName, tempStr,context);
                 sumResult = sumResult + qResult;
                 logger.info("context is " + context + " score is " + qResult);
             }

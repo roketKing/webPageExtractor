@@ -8,21 +8,14 @@ import java.util.List;
 
 public class ListPage extends ListPageInfo {
     /**
-     * 列表页的节点内容
+     * 列表页当前的节点
      */
-    Node node;
-
     Block block;
 
+    /**
+     * 列表页的孩子节点
+     */
     List<Block> childBlocks;
-
-    public Node getNode() {
-        return node;
-    }
-
-    public void setNode(Node node) {
-        this.node = node;
-    }
 
     public Block getBlock() {
         return block;

@@ -1,37 +1,24 @@
 package cn.edu.seu.webPageExtractor.controller;
 
 
+import cn.edu.seu.webPageExtractor.constants.TaskEventEnum;
 import cn.edu.seu.webPageExtractor.constants.TaskStateEnum;
 import cn.edu.seu.webPageExtractor.controller.dto.ResultTableDto;
 import cn.edu.seu.webPageExtractor.controller.dto.TableDataDto;
 import cn.edu.seu.webPageExtractor.controller.dto.TaskInfoDto;
-import cn.edu.seu.webPageExtractor.core.DetailPageInfo;
 import cn.edu.seu.webPageExtractor.core.ExtraResultInfo;
 import cn.edu.seu.webPageExtractor.core.TaskInfo;
-import cn.edu.seu.webPageExtractor.core.page.DetailPage;
-import cn.edu.seu.webPageExtractor.core.page.ListPage;
-import cn.edu.seu.webPageExtractor.core.page.feature.Block;
-import cn.edu.seu.webPageExtractor.graph.service.GraphScoreService;
-import cn.edu.seu.webPageExtractor.service.DetailPageFeatureService;
-import cn.edu.seu.webPageExtractor.service.PageCrawlService;
-import cn.edu.seu.webPageExtractor.service.PageDivideService;
 import cn.edu.seu.webPageExtractor.service.TaskManageService;
 import cn.edu.seu.webPageExtractor.service.manage.DbTransferManager;
-import cn.edu.seu.webPageExtractor.service.manage.DetailPageInfoManager;
 import cn.edu.seu.webPageExtractor.service.manage.ExtraResultManager;
 import com.google.gson.Gson;
-import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.statemachine.StateMachine;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Controller
 public class TaskController {
@@ -41,6 +28,8 @@ public class TaskController {
     @Autowired
     private ExtraResultManager extraResultManager;
 
+    @Autowired
+    private StateMachine<TaskStateEnum, TaskEventEnum> stateMachine;
 
     @GetMapping("/task")
     public String index() {

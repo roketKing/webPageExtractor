@@ -6,112 +6,31 @@ import java.util.List;
 
 public class Block {
     /**
-     * 分块中链接的数量
-     */
-    Integer linkNumber;
-    /**
-     * 分块中的文本密度
-     */
-    Float contextDensity;
-    /**
-     * 分块中的文本
-     */
-    List<String> context;
-
-    /**
-     * 分块中文本的数量
-     */
-    Integer contextStrLength;
-    /**
-     * 分块中的领域得分
-     */
-    Float domainScore;
-    /**
      * 分块中的节点内容
      */
-    Node node;
+    private Node node;
     /**
      * 子分块
      */
-    List<Block> blocks;
+    private List<Block> blocks;
 
     /**
      * 父分块
      */
-    Block parentBlock;
-    /**
-     * 可视
-     */
-    private boolean visualBlock;
+    private Block parentBlock;
 
     /**
-     * block值
+     * 块的特征
      */
-    private Integer doc;
-
+    private BlockDeNoiseFeature blockDeNoiseFeature;
     /**
-     * 可以分割
+     * 块的标签
      */
-    private Boolean divide;
+    private BlockDivideFeature blockDivideFeature;
 
-    /**
-     * 是否是inlineNode，修饰文本的节点
-     * 例如 B
-     */
-    private Boolean inlineNode;
-
-    /**
-     * 是否是linebreakNode
-     */
-    private Boolean lineBreakNode;
-
-    /**
-     * 是否是合法节点
-     */
-    private Boolean validnode;
-
-    /**
-     * 是否是纯文本节点，即没有html标签修饰的文本
-     */
-    private Boolean textNode;
-
-    /**
-     * inlineNode中是虚拟的文本节点
-     */
-    private Boolean virtualTextNode;
-
-    private Float scoreResult;
-
-    public Integer getLinkNumber() {
-        return linkNumber;
-    }
-
-    public void setLinkNumber(Integer linkNumber) {
-        this.linkNumber = linkNumber;
-    }
-
-    public Float getContextDensity() {
-        return contextDensity;
-    }
-
-    public void setContextDensity(Float contextDensity) {
-        this.contextDensity = contextDensity;
-    }
-
-    public List<String> getContext() {
-        return context;
-    }
-
-    public void setContext(List<String> context) {
-        this.context = context;
-    }
-
-    public Float getDomainScore() {
-        return domainScore;
-    }
-
-    public void setDomainScore(Float domainScore) {
-        this.domainScore = domainScore;
+    public Block (){
+        this.blockDeNoiseFeature = new BlockDeNoiseFeature();
+        this.blockDivideFeature = new BlockDivideFeature();
     }
 
     public Node getNode() {
@@ -138,83 +57,19 @@ public class Block {
         this.parentBlock = parentBlock;
     }
 
-    public boolean isVisualBlock() {
-        return visualBlock;
+    public BlockDeNoiseFeature getBlockDeNoiseFeature() {
+        return blockDeNoiseFeature;
     }
 
-    public void setVisualBlock(boolean visualBlock) {
-        this.visualBlock = visualBlock;
+    public void setBlockDeNoiseFeature(BlockDeNoiseFeature blockDeNoiseFeature) {
+        this.blockDeNoiseFeature = blockDeNoiseFeature;
     }
 
-    public Integer getDoc() {
-        return doc;
+    public BlockDivideFeature getBlockDivideFeature() {
+        return blockDivideFeature;
     }
 
-    public void setDoc(Integer doc) {
-        this.doc = doc;
-    }
-
-    public Boolean getDivide() {
-        return divide;
-    }
-
-    public void setDivide(Boolean divide) {
-        this.divide = divide;
-    }
-
-    public Boolean getInlineNode() {
-        return inlineNode;
-    }
-
-    public void setInlineNode(Boolean inlineNode) {
-        this.inlineNode = inlineNode;
-    }
-
-    public Boolean getLineBreakNode() {
-        return lineBreakNode;
-    }
-
-    public void setLineBreakNode(Boolean lineBreakNode) {
-        this.lineBreakNode = lineBreakNode;
-    }
-
-    public Boolean getValidnode() {
-        return validnode;
-    }
-
-    public void setValidnode(Boolean validnode) {
-        this.validnode = validnode;
-    }
-
-    public Boolean getTextNode() {
-        return textNode;
-    }
-
-    public void setTextNode(Boolean textNode) {
-        this.textNode = textNode;
-    }
-
-    public Boolean getVirtualTextNode() {
-        return virtualTextNode;
-    }
-
-    public void setVirtualTextNode(Boolean virtualTextNode) {
-        this.virtualTextNode = virtualTextNode;
-    }
-
-    public Integer getContextStrLength() {
-        return contextStrLength;
-    }
-
-    public void setContextStrLength(Integer contextStrLength) {
-        this.contextStrLength = contextStrLength;
-    }
-
-    public Float getScoreResult() {
-        return scoreResult;
-    }
-
-    public void setScoreResult(Float scoreResult) {
-        this.scoreResult = scoreResult;
+    public void setBlockDivideFeature(BlockDivideFeature blockDivideFeature) {
+        this.blockDivideFeature = blockDivideFeature;
     }
 }

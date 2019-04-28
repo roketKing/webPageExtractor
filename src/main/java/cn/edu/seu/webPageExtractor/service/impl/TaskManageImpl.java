@@ -2,14 +2,13 @@ package cn.edu.seu.webPageExtractor.service.impl;
 
 import cn.edu.seu.webPageExtractor.constants.TaskStateEnum;
 import cn.edu.seu.webPageExtractor.controller.dto.TaskInfoDto;
-import cn.edu.seu.webPageExtractor.core.ExtraResultInfo;
 import cn.edu.seu.webPageExtractor.core.TaskInfo;
 import cn.edu.seu.webPageExtractor.core.page.DetailPage;
 import cn.edu.seu.webPageExtractor.core.page.ListPage;
 import cn.edu.seu.webPageExtractor.core.page.feature.Block;
+import cn.edu.seu.webPageExtractor.core.page.feature.Context;
 import cn.edu.seu.webPageExtractor.graph.service.GraphScoreService;
 import cn.edu.seu.webPageExtractor.service.*;
-import cn.edu.seu.webPageExtractor.service.manage.ExtraResultManager;
 import cn.edu.seu.webPageExtractor.service.repository.TaskRepository;
 import org.openqa.selenium.WebDriver;
 import org.springframework.beans.BeanUtils;
@@ -37,16 +36,13 @@ public class TaskManageImpl implements TaskManageService {
     private GraphScoreService graphScoreService;
 
     @Autowired
-    private DetailPageFeatureService detailPageFeatureService;
+    private PageFeatureGenerateService pageFeatureGenerateService;
 
     @Autowired
     private PageDeNoiseService pageDeNoiseService;
 
     @Autowired
     private PageExtraService pageExtraService;
-
-    @Autowired
-    private PageFeatureGenerateService pageFeatureGenerateService;
 
     @Override
     public TaskInfoDto createATask(TaskInfo taskInfo) {
@@ -132,9 +128,14 @@ public class TaskManageImpl implements TaskManageService {
             //分割列表页
             pageDivideService.listPageDivide(listPage);
             //获取特征
-            detailPageFeatureService.getListPageBlockFeature(listPage, taskInfoDto);
+            driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+            pageFeatureGenerateService.listPageFeatureGenerate(listPage, taskInfoDto);
+            //获取负例
+            String negativeLink ="https://item.jd.com/41864916589.html";
+            DetailPage detailPage = pageCrawlService.getDetailPage(negativeLink,123456,3,driver);
+            List<Context> negativeContexts = pageFeatureGenerateService.getSpecialTagContextFeature(detailPage);
             //页面降噪
-            List<Block> correctBlock = pageDeNoiseService.listPageDeNoise(listPage);
+            List<Block> correctBlock = pageDeNoiseService.listPageDeNoise(listPage,negativeContexts);
             //页面抽取
             pageExtraService.listPageExtra(correctBlock, taskInfoDto);
         }

@@ -8,10 +8,14 @@
     <title>电商信息抽取系统</title>
 
     <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">-->
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css" rel="stylesheet">
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.7/dist/css/bootstrap-select.min.css">
+    <!--<link rel="stylesheet"-->
+    <!--href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.7/dist/css/bootstrap-select.min.css">-->
+    <link rel="stylesheet"
+          href="https://cdn.bootcss.com/bootstrap-select/1.13.7/css/bootstrap-select.min.css">
 
     <!-- HTML5 shim 和 Respond.js 是为了让 IE8 支持 HTML5 元素和媒体查询（media queries）功能 -->
     <!-- 警告：通过 file:// 协议（就是直接将 html 页面拖拽到浏览器中）访问页面时 Respond.js 不起作用 -->
@@ -29,6 +33,7 @@
         <button type="button" class="btn btn-primary" id="startTaskButton">开始任务</button>
         <button type="button" class="btn btn-primary" id="queryTaskResultButton">查看任务结果</button>
         <button type="button" class="btn btn-primary" id="getTaskDetailButton">查看任务详情</button>
+        <button type="button" class="btn btn-primary" id="reSetTaskState">重置任务</button>
     </div>
     <div class="col-md-2"></div>
 </div>
@@ -76,14 +81,14 @@
                         <div class="form-group">
                             <label for="taskName" class="col-sm-5 control-label">任务类型</label>
                             <div class="col-sm-7">
-                                <select id = "taskType" title="请选择任务类型">
+                                <select id="taskType" title="请选择任务类型">
                                     <option>领域图谱构建训练任务</option>
                                     <option>商品搜索结果页抽取</option>
                                     <option>商品详情页抽取</option>
                                 </select>
                             </div>
                         </div>
-                        <div id ="webPage">
+                        <div id="webPage">
 
                         </div>
                         <div class="modal-footer">
@@ -113,7 +118,7 @@
                 </div>
                 <div class="modal-body">
                     <form class="form-horizontal" role="form">
-                        <div id ="detailArea">
+                        <div id="detailArea">
 
                         </div>
                         <div class="modal-footer">
@@ -128,16 +133,19 @@
 </div>
 
 <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
-<script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>-->
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
 <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>-->
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
 <!-- Latest compiled and minified JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.7/dist/js/bootstrap-select.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.7/dist/js/bootstrap-select.min.js"></script>-->
+<script src="https://cdn.bootcss.com/bootstrap-select/1.13.7/js/bootstrap-select.min.js"></script>
 <script>
     $(document).ready(function () {
-        var s= $('#taskType').selectpicker();
+        var s = $('#taskType').selectpicker();
         var t = $('#myTable').DataTable({
             "serverSide": true,
             "paging": true,
@@ -173,13 +181,15 @@
             if ($(this).hasClass('selected')) {
                 $(this).removeClass('selected');
                 $(this).css('background-color', '#f9f9f9');
-
+                checkButtonState(50,null)
             }
             else {
                 t.$('tr.selected').css('background-color', '#f9f9f9');
                 t.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');
                 $(this).css('background-color', '#337ab7');
+                var rowData = t.row('.selected').data();
+                checkButtonState(rowData.state,rowData.type);
             }
         });
         $('#startTaskButton').click(function () {
@@ -213,27 +223,27 @@
                 }
                 t.row('.selected').remove().draw(false);
             } else {
-               alert("请先选择任务")
+                alert("请先选择任务")
             }
         });
         $('#submitTaskInfo').on('click', function () {
             var taskInfo = {};
             var selectIndex = $('#taskType').find("option:selected").index();
-            if (selectIndex === 1){
+            if (selectIndex === 1) {
                 taskInfo.type = 10;
                 taskInfo.name = $('#taskName').val();
                 taskInfo.domain = $('#taskDomain').val();
-            }else if(selectIndex === 2){
+            } else if (selectIndex === 2) {
                 taskInfo.type = 20;
                 taskInfo.name = $('#taskName').val();
                 taskInfo.domain = $('#taskDomain').val();
                 taskInfo.keyword = $('#taskKeyword').val();
                 taskInfo.link = $('#taskLink').val();
-            }else if (selectIndex === 3) {
+                taskInfo.pageNum = $('#taskPageNum').val();
+            } else if (selectIndex === 3) {
                 taskInfo.type = 30;
                 taskInfo.name = $('#taskName').val();
                 taskInfo.domain = $('#taskDomain').val();
-                taskInfo.keyword = $('#taskKeyword').val();
                 taskInfo.link = $('#taskLink').val();
             }
 
@@ -276,11 +286,11 @@
                     "&pageAddress=" +
                     rowData.link;
             } else {
-               alert("请先选择任务！")
+                alert("请先选择任务！")
             }
         });
         $('#taskType').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
-            var pageStr = "<div class=\"form-group\">\n" +
+            var listpageStr = "<div class=\"form-group\">\n" +
                 "                            <label for=\"taskDomain\" class=\"col-sm-5 control-label\">任务领域</label>\n" +
                 "                            <div class=\"col-sm-7\">\n" +
                 "                                <input type=\"text\" class=\"form-control\" id=\"taskDomain\" placeholder=\"请输入任务领域\">\n" +
@@ -297,9 +307,27 @@
                 "                            <div class=\"col-sm-7\">\n" +
                 "                                <textarea class=\"form-control\" id=\"taskLink\" placeholder=\"请输入地址,用；分开\"/>\n" +
                 "                            </div>\n" +
+                "                        </div>" +
+                "                        <div class=\"form-group\">\n" +
+                "                            <label for=\"taskKeyword\" class=\"col-sm-5 control-label\">抽取页码数</label>\n" +
+                "                            <div class=\"col-sm-7\">\n" +
+                "                                <input type=\"text\" class=\"form-control\" id=\"taskPageNum\" placeholder=\"请输入页码数\">\n" +
+                "                            </div>\n" +
+                "                        </div>\n";
+            var detailPageStr = "<div class=\"form-group\">\n" +
+                "                            <label for=\"taskDomain\" class=\"col-sm-5 control-label\">任务领域</label>\n" +
+                "                            <div class=\"col-sm-7\">\n" +
+                "                                <input type=\"text\" class=\"form-control\" id=\"taskDomain\" placeholder=\"请输入任务领域\">\n" +
+                "                            </div>\n" +
+                "                        </div>\n" +
+                "                        <div class=\"form-group\">\n" +
+                "                            <label for=\"taskLink\" class=\"col-sm-5 control-label\">页面链接地址</label>\n" +
+                "                            <div class=\"col-sm-7\">\n" +
+                "                                <textarea class=\"form-control\" id=\"taskLink\" placeholder=\"请输入地址,用；分开\"/>\n" +
+                "                            </div>\n" +
                 "                        </div>";
             var domainStr = "<div class=\"form-group\">\n" +
-                "                            <label for=\"taskDomain\" class=\"col-sm-5 control-label\">领域</label>\n" +
+                "                            <label for=\"taskDomain\" class=\"col-sm-5 control-label\">任务领域</label>\n" +
                 "                            <div class=\"col-sm-7\">\n" +
                 "                                <input type=\"text\" class=\"form-control\" id=\"taskDomain\" placeholder=\"请输入任务领域\">\n" +
                 "                            </div>\n" +
@@ -307,27 +335,116 @@
             if (clickedIndex === 1) {
                 $('#webPage').html(domainStr);
             }
-            if(clickedIndex === 2 || clickedIndex ===3){
-                $('#webPage').html(pageStr);
+            if (clickedIndex === 2) {
+                $('#webPage').html(listpageStr);
+            }
+            if (clickedIndex === 3) {
+                $('#webPage').html(detailPageStr);
             }
             console.log(clickedIndex)
         });
         $('#getTaskDetailButton').on('click', function () {
             var rowData = t.row('.selected').data();
-            var pageStr = "<div class=\"form-group\">\n" +
-                "                            <label for=\"taskDomain\" class=\"col-sm-5 control-label\">抽取关键词</label>\n" +
-                "                            <div class=\"col-sm-7\">\n" + rowData.keyword+
-                "                            </div>\n" +
-                "                        </div>\n" +
-                "                        <div class=\"form-group\">\n" +
-                "                            <label for=\"taskKeyword\" class=\"col-sm-5 control-label\">抽取页面链接</label>\n" +
-                "                            <div class=\"col-sm-7\">\n" + "<textarea>"+rowData.link+"</textarea>"+
-                "                            </div>\n" +
-                "                        </div>\n" ;
+            //分为知识图谱预处理任务，搜索结果页任务，详情页任务
+            var pageStr = "";
+            if (rowData !== undefined) {
+                pageStr = "<div class=\"form-group\">\n" +
+                    "                            <label for=\"taskDomain\" class=\"col-sm-5 control-label\">任务名称</label>\n" +
+                    "                            <div class=\"col-sm-7\">\n" + rowData.name +
+                    "                            </div>\n" +
+                    "                        </div>\n" +
+                    "<div class=\"form-group\">\n" +
+                    "                            <label for=\"taskDomain\" class=\"col-sm-5 control-label\">任务类型</label>\n" +
+                    "                            <div class=\"col-sm-7\">\n" + rowData.typeString +
+                    "                            </div>\n" +
+                    "                        </div>\n" +
+                    "<div class=\"form-group\">\n" +
+                    "                            <label for=\"taskDomain\" class=\"col-sm-5 control-label\">任务领域</label>\n" +
+                    "                            <div class=\"col-sm-7\">\n" + rowData.domain +
+                    "                            </div>\n" +
+                    "                        </div>\n" +
+                    "<div class=\"form-group\">\n" +
+                    "                            <label for=\"taskDomain\" class=\"col-sm-5 control-label\">创建时间</label>\n" +
+                    "                            <div class=\"col-sm-7\">\n" + rowData.dateString +
+                    "                            </div>\n" +
+                    "                        </div>\n" +
+                    "                        <div class=\"form-group\">\n" +
+                    "                            <label for=\"taskKeyword\" class=\"col-sm-5 control-label\">任务状态</label>\n" +
+                    "                            <div class=\"col-sm-7\">\n" +   rowData.stateName  +
+                    "                            </div>\n" +
+                    "                        </div>\n";
+
+                if (rowData.type === 20) {
+                    pageStr += "<div class=\"form-group\">\n" +
+                        "                            <label for=\"taskDomain\" class=\"col-sm-5 control-label\">抽取关键词</label>\n" +
+                        "                            <div class=\"col-sm-7\">\n" + rowData.keyword +
+                        "                            </div>\n" +
+                        "                        </div>\n" +
+                        "                        <div class=\"form-group\">\n" +
+                        "                            <label for=\"taskKeyword\" class=\"col-sm-5 control-label\">抽取页面链接</label>\n" +
+                        "                            <div class=\"col-sm-7\">\n" + "<textarea>" + rowData.link + "</textarea>" +
+                        "                            </div>\n" +
+                        "                        </div>\n" +
+                        "                        <div class=\"form-group\">\n" +
+                        "                            <label for=\"taskKeyword\" class=\"col-sm-5 control-label\">页数</label>\n" +
+                        "                            <div class=\"col-sm-7\">\n" +   rowData.pageNum +
+                        "                            </div>\n" +
+                        "                        </div>\n";
+
+                }
+                if (rowData.type === 30) {
+                    pageStr += "                        <div class=\"form-group\">\n" +
+                        "                            <label for=\"taskKeyword\" class=\"col-sm-5 control-label\">抽取页面链接</label>\n" +
+                        "                            <div class=\"col-sm-7\">\n" + "<textarea>" + rowData.link + "</textarea>" +
+                        "                            </div>\n" +
+                        "                        </div>\n";
+                }
+            }
 
             $('#detailArea').html(pageStr);
             $('#taskDetail').modal('show');
         });
+
+        $('#reSetTaskState').on('click', function () {
+            var rowData = t.row('.selected').data();
+            var pageStr = "<div class=\"form-group\">\n" +
+                "                            <label for=\"taskDomain\" class=\"col-sm-5 control-label\">抽取关键词</label>\n" +
+                "                            <div class=\"col-sm-7\">\n" + rowData.keyword +
+                "                            </div>\n" +
+                "                        </div>\n" +
+                "                        <div class=\"form-group\">\n" +
+                "                            <label for=\"taskKeyword\" class=\"col-sm-5 control-label\">抽取页面链接</label>\n" +
+                "                            <div class=\"col-sm-7\">\n" + "<textarea>" + rowData.link + "</textarea>" +
+                "                            </div>\n" +
+                "                        </div>\n";
+
+            $('#detailArea').html(pageStr);
+            $('#taskDetail').modal('show');
+        });
+        
+        function checkButtonState(state,type) {
+            if (state===10) {
+                $('#queryTaskResultButton').attr("disabled","disabled");
+                $('#reSetTaskState').attr("disabled","disabled");
+            }else if (state === 20){
+                $('#queryTaskResultButton').attr("disabled","disabled");
+                $('#reSetTaskState').attr("disabled","disabled");
+                $('#startTaskButton').attr("disabled","disabled");
+            } else if (state === 30){
+                $('#startTaskButton').attr("disabled","disabled");
+                $('#reSetTaskState').attr("disabled","disabled");
+                if (type===10)
+                    $('#queryTaskResultButton').attr("disabled","disabled");
+            } else if (state === 40) {
+                $('#queryTaskResultButton').attr("disabled","disabled");
+                $('#startTaskButton').attr("disabled","disabled");
+            }else {
+                $('#queryTaskResultButton').
+                $('#reSetTaskState').attr("disabled","");
+                $('#startTaskButton').attr("disabled","");
+            }
+            
+        }
 
     });
 </script>

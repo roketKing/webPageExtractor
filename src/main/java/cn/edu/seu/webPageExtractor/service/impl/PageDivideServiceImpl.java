@@ -23,7 +23,7 @@ public class PageDivideServiceImpl implements PageDivideService {
      */
     @Override
     public void listPageDivide(ListPage listPage) {
-        WebElement body = listPage.getNode().getElement();
+        WebElement body = listPage.getBlock().getNode().getElement();
         List<WebElement> childs = body.findElements(By.xpath("./*"));
 
         Map<Integer, Integer> eleSizeMap = new HashMap<>();
@@ -36,18 +36,18 @@ public class PageDivideServiceImpl implements PageDivideService {
             sizeSet.add(sizeResult);
         }
         //只有一个大小则返回，有多个大小的取最大区间继续分割
-        if (sizeSet.size() == 1) {
+        if (sizeSet.size() == 1 && childs.size()>1) {
             Block block = new Block();
             Node node = new Node();
             node.setElement(body);
             block.setNode(node);
             listPage.setBlock(block);
             List<Block> childBlocks = new ArrayList<>();
-            for (int i = 0; i < childs.size(); i++){
+            for (WebElement child : childs) {
                 Block tempBlock = new Block();
                 Node tempNode = new Node();
-                tempNode.setElement(body);
-                tempBlock.setNode(node);
+                tempNode.setElement(child);
+                tempBlock.setNode(tempNode);
                 childBlocks.add(tempBlock);
             }
             listPage.setChildBlocks(childBlocks);
@@ -63,7 +63,7 @@ public class PageDivideServiceImpl implements PageDivideService {
         });
 
         WebElement bigElement = childs.get(eleSizeMapList.get(0).getKey());
-        listPage.getNode().setElement(bigElement);
+        listPage.getBlock().getNode().setElement(bigElement);
 
         listPageDivide(listPage);
 
@@ -105,7 +105,7 @@ public class PageDivideServiceImpl implements PageDivideService {
         //判断是否需要分割
         applyVipsRules(block, 140000);
 
-        if (block.getDivide()) {
+        if (block.getBlockDivideFeature().getDivide()) {
             //继续获取其子节点,并分割
             for (Block childBlock : block.getBlocks()) {
                 blockDivide(childBlock);
@@ -119,15 +119,15 @@ public class PageDivideServiceImpl implements PageDivideService {
         WebElement currentEle = block.getNode().getElement();
 
         if (PageDivideRuleUtil.isInLineNode(currentEle)) {
-            block.setInlineNode(true);
-            block.setLineBreakNode(false);
+            block.getBlockDivideFeature().setInlineNode(true);
+            block.getBlockDivideFeature().setLineBreakNode(false);
         } else {
-            block.setLineBreakNode(true);
-            block.setInlineNode(false);
+            block.getBlockDivideFeature().setLineBreakNode(true);
+            block.getBlockDivideFeature().setInlineNode(false);
         }
-        block.setTextNode(PageDivideRuleUtil.isTextNode(currentEle));
-        block.setValidnode(PageDivideRuleUtil.isValidNode(currentEle));
-        block.setVirtualTextNode(PageDivideRuleUtil.isVirtualTextNode(currentEle));
+        block.getBlockDivideFeature().setTextNode(PageDivideRuleUtil.isTextNode(currentEle));
+        block.getBlockDivideFeature().setValidnode(PageDivideRuleUtil.isValidNode(currentEle));
+        block.getBlockDivideFeature().setVirtualTextNode(PageDivideRuleUtil.isVirtualTextNode(currentEle));
     }
 
 
@@ -137,7 +137,7 @@ public class PageDivideServiceImpl implements PageDivideService {
         //System.err.println("Applying VIPS rules on " + node.getNode().getNodeName() + " node");
         WebElement currentElement = block.getNode().getElement();
         String elementTagName = currentElement.getTagName();
-        if (block.getInlineNode()) {
+        if (block.getBlockDivideFeature().getInlineNode()) {
             retVal = PageDivideRuleUtil.applyInlineTextNodeVipsRules(block, threshold);
         } else if (elementTagName.equals("table") || elementTagName.equals("dl")) {
             retVal = PageDivideRuleUtil.applyTableNodeVipsRules(block, threshold);

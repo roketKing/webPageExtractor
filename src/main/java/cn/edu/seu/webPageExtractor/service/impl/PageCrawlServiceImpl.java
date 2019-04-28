@@ -68,10 +68,14 @@ public class PageCrawlServiceImpl implements PageCrawlService {
             if (pageCount > pageNum) {
                 break;
             }
+
+            Block block = new Block();
+            block.setNode(body);
+
             ListPage listPage = new ListPage();
-            listPage.setNode(body);
             listPage.setTaskId(taskId);
             listPage.setLink(body.getLink());
+            listPage.setBlock(block);
 
             //存入本地
             try {
@@ -133,8 +137,11 @@ public class PageCrawlServiceImpl implements PageCrawlService {
                 result.retainAll(tempResult);
             }
         }
-
-        node.setLink(result.get(0));
+        if (result.size()>0){
+            node.setLink(result.get(0));
+        }else {
+            node.setLink(null);
+        }
 
     }
 

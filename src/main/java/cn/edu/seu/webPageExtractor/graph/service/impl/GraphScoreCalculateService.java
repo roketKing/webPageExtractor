@@ -1,6 +1,8 @@
 package cn.edu.seu.webPageExtractor.graph.service.impl;
 
+import cn.edu.seu.webPageExtractor.constants.ContextType;
 import cn.edu.seu.webPageExtractor.core.GraphScoreInfo;
+import cn.edu.seu.webPageExtractor.core.page.feature.Context;
 import cn.edu.seu.webPageExtractor.graph.Triple;
 import cn.edu.seu.webPageExtractor.graph.service.GraphQueryService;
 import cn.edu.seu.webPageExtractor.graph.service.GraphSearchService;
@@ -97,7 +99,7 @@ public class GraphScoreCalculateService {
     }
 
 
-    public Float calculateWordDomainScore(String categoryName,String word){
+    public Float calculateWordDomainScore(String categoryName, String word, Context context){
         Float scoreResult = 0.0f;
         //先通过es搜索对应的属性
         Map<String,String> scriptParams = new HashMap<>();
@@ -108,10 +110,19 @@ public class GraphScoreCalculateService {
         scriptParams.put("value2",word);
 
         String propertyName = graphSearchService.searchByWord(scriptParams);
-        scriptParams.put("field2","properties.propertyValue");
-        scriptParams.put("value2",word);
+
+
         if (propertyName == null){
+            scriptParams.put("field2","properties.propertyValue");
+            scriptParams.put("value2",word);
             propertyName = graphSearchService.searchByWord(scriptParams);
+            if (propertyName!=null){
+                context.setType(ContextType.PROPERTYVALUE_CONTEXT);
+            }else {
+                context.setType(ContextType.NORMAL_CONTEXT);
+            }
+        }else {
+            context.setType(ContextType.PROPERTY_CONTEXT);
         }
 
         if (propertyName!=null){

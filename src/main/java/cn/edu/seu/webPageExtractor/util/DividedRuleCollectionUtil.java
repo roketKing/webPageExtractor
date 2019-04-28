@@ -30,16 +30,16 @@ public class DividedRuleCollectionUtil {
         }
 
         Integer noValidChildNum = 0;
-        if (!block.getTextNode().equals(true)) {
+        if (!block.getBlockDivideFeature().getTextNode().equals(true)) {
             for (Block childBlock : block.getBlocks()) {
-                if (!childBlock.getValidnode().equals(true)) {
+                if (!childBlock.getBlockDivideFeature().getValidnode().equals(true)) {
                     noValidChildNum++;
                 }
             }
         }
 
         if (noValidChildNum == block.getBlocks().size()) {
-            block.setDivide(false);
+            block.getBlockDivideFeature().setDivide(false);
             isApplying = true;
             logger.info("node class:" + block.getNode().getElement().getTagName() + "rule one:" + isApplying);
 
@@ -65,16 +65,16 @@ public class DividedRuleCollectionUtil {
 
         List<Block> tempBlockList = new ArrayList<>();
         for (Block childBlock : block.getBlocks()) {
-            if (childBlock.getValidnode().equals(true)) {
+            if (childBlock.getBlockDivideFeature().getValidnode().equals(true)) {
                 tempBlockList.add(block);
             }
         }
 
         if (tempBlockList.size() == 1) {
             Block firstBlock = tempBlockList.get(0);
-            if (!firstBlock.getTextNode().equals(true)) {
+            if (!firstBlock.getBlockDivideFeature().getTextNode().equals(true)) {
                 isApplying = true;
-                block.setDivide(true);
+                block.getBlockDivideFeature().setDivide(true);
                 logger.info("node class:" + block.getNode().getElement().getTagName() + "rule two:" + isApplying);
 
             }
@@ -101,7 +101,7 @@ public class DividedRuleCollectionUtil {
 
         if (block.getBlocks().size() == 1) {
             isApplying = true;
-            block.setDivide(true);
+            block.getBlockDivideFeature().setDivide(true);
             logger.info("node class:" + block.getNode().getElement().getTagName() + "rule three:" + isApplying);
 
         }
@@ -131,18 +131,18 @@ public class DividedRuleCollectionUtil {
         Integer textNodeSize = 0;
         Integer virtualNodeSize = 0;
         for (Block childBlock : block.getBlocks()) {
-            if (childBlock.getTextNode().equals(true)) {
+            if (childBlock.getBlockDivideFeature().getTextNode().equals(true)) {
                 textNodeSize++;
             }
-            if (childBlock.getVirtualTextNode().equals(true)) {
+            if (childBlock.getBlockDivideFeature().getVirtualTextNode().equals(true)) {
                 virtualNodeSize++;
             }
         }
 
         if (textNodeSize + virtualNodeSize == block.getBlocks().size()) {
             isApplying = true;
-            block.setDivide(false);
-            block.setVisualBlock(true);
+            block.getBlockDivideFeature().setDivide(false);
+            block.getBlockDivideFeature().setVisualBlock(true);
             logger.info("node class:" + block.getNode().getElement().getTagName() + "rule four:" + isApplying);
 
         }
@@ -168,8 +168,8 @@ public class DividedRuleCollectionUtil {
         }
 
         for (Block childBlock : block.getBlocks()) {
-            if (childBlock.getLineBreakNode().equals(true)) {
-                block.setDivide(true);
+            if (childBlock.getBlockDivideFeature().getLineBreakNode().equals(true)) {
+                block.getBlockDivideFeature().setDivide(true);
                 logger.info("node class:" + block.getNode().getElement().getTagName() + "rule five isApplying");
                 return true;
             }
@@ -194,7 +194,7 @@ public class DividedRuleCollectionUtil {
 
         for (Block childBlock : block.getBlocks()) {
             if (childBlock.getNode().getElement().getTagName().equals("hr")) {
-                block.setDivide(true);
+                block.getBlockDivideFeature().setDivide(true);
                 logger.info("node class:" + block.getNode().getElement().getTagName() + "rule six isApplying");
                 return true;
             }
@@ -221,7 +221,7 @@ public class DividedRuleCollectionUtil {
             sumOfChildElement = sumOfChildElement + childEle.getSize().getHeight() * childEle.getSize().getWidth();
         }
         if (sumOfChildElement > currentBlcokSize){
-            block.setDivide(true);
+            block.getBlockDivideFeature().setDivide(true);
             return true;
         }
         return false;
@@ -243,7 +243,7 @@ public class DividedRuleCollectionUtil {
         if (block.getBlocks().isEmpty())
             return false;
 
-        if (block.getTextNode().equals(true))
+        if (block.getBlockDivideFeature().getTextNode().equals(true))
             return false;
 
         String nodeBgColor = block.getNode().getElement().getCssValue("background-color");
@@ -251,9 +251,9 @@ public class DividedRuleCollectionUtil {
         for (Block childBlock : block.getBlocks()) {
             WebElement childEle = childBlock.getNode().getElement();
             if (!(childEle.getCssValue("background-color").equals(nodeBgColor))) {
-                block.setDivide(true);
+                block.getBlockDivideFeature().setDivide(true);
                 // TODO DoC values
-                childBlock.setDoc(7);
+                childBlock.getBlockDivideFeature().setDoc(7);
                 logger.info("node class:" + block.getNode().getElement().getTagName() + "rule Eight isApplying");
                 return true;
             }
@@ -284,18 +284,18 @@ public class DividedRuleCollectionUtil {
         Integer currentElementSize = currentEle.getSize().getWidth()*currentEle.getSize().getHeight();
 
         for (Block childBlock : block.getBlocks()) {
-           if (childBlock.getTextNode().equals(true) || childBlock.getVirtualTextNode().equals(true)) {
+           if (childBlock.getBlockDivideFeature().getTextNode().equals(true) || childBlock.getBlockDivideFeature().getVirtualTextNode().equals(true)) {
                 if (currentElementSize <threshold){
-                    block.setVisualBlock(true);
-                    block.setDivide(false);
+                    block.getBlockDivideFeature().setVisualBlock(true);
+                    block.getBlockDivideFeature().setDivide(false);
                     if (currentEle.getTagName().equals("Xdiv"))
-                        block.setDoc(7);
+                        block.getBlockDivideFeature().setDoc(7);
                     else if (currentEle.getTagName().equals("code"))
-                        block.setDoc(7);
+                        block.getBlockDivideFeature().setDoc(7);
                     else if (currentEle.getTagName().equals("div"))
-                        block.setDoc(5);
+                        block.getBlockDivideFeature().setDoc(5);
                     else
-                        block.setDoc(8);
+                        block.getBlockDivideFeature().setDoc(8);
 
                     logger.info("node class:" + block.getNode().getElement().getTagName() + "rule Nine isApplying");
 
@@ -333,16 +333,16 @@ public class DividedRuleCollectionUtil {
         }
 
         if (maxSize < threshold) {
-            block.setDivide(false);
-            block.setVisualBlock(true);
+            block.getBlockDivideFeature().setDivide(false);
+            block.getBlockDivideFeature().setVisualBlock(true);
 
             WebElement ele = block.getNode().getElement();
             if (ele.getTagName().equals("div")) {
-                block.setDoc(7);
+                block.getBlockDivideFeature().setDoc(7);
             } else if (ele.getTagName().equals("a")) {
-                block.setDoc(11);
+                block.getBlockDivideFeature().setDoc(11);
             } else {
-                block.setDoc(8);
+                block.getBlockDivideFeature().setDoc(8);
             }
 
             logger.info("node class:" + block.getNode().getElement().getTagName() + "rule Ten isApplying");
@@ -366,8 +366,8 @@ public class DividedRuleCollectionUtil {
         List<Block> parentChildBlocks = parentBlock.getBlocks();
 
         for (Block childBlock : parentChildBlocks) {
-            if (!childBlock.getDivide().equals(true)) {
-                block.setDivide(false);
+            if (!childBlock.getBlockDivideFeature().getDivide().equals(true)) {
+                block.getBlockDivideFeature().setDivide(false);
 
                 logger.info("node class:" + block.getNode().getElement().getTagName() + "rule Eleven isApplying");
 
@@ -388,11 +388,11 @@ public class DividedRuleCollectionUtil {
      */
     public static boolean ruleTwelve(Block block) {
         //System.err.println("Applying rule Eleven on " + node.getNode().getNodeName() + " node");
-        block.setDivide(true);
+        block.getBlockDivideFeature().setDivide(true);
 
         logger.info("node class:" + block.getNode().getElement().getTagName() + "rule Twelve isApplying");
 
-        return block.getTextNode().equals(true);
+        return block.getBlockDivideFeature().getTextNode().equals(true);
     }
 
     /**
@@ -407,22 +407,22 @@ public class DividedRuleCollectionUtil {
     public static boolean ruleThirteen(Block block) {
         //System.err.println("Applying rule Twelve on " + node.getNode().getNodeName() + " node");
 
-        block.setDivide(false);
-        block.setVisualBlock(true);
+        block.getBlockDivideFeature().setDivide(false);
+        block.getBlockDivideFeature().setVisualBlock(true);
 
         WebElement ele = block.getNode().getElement();
         if (ele.getTagName().equals("Xdiv"))
-            block.setDoc(7);
+            block.getBlockDivideFeature().setDoc(7);
         else if (ele.getTagName().equals("li"))
-            block.setDoc(8);
+            block.getBlockDivideFeature().setDoc(8);
         else if (ele.getTagName().equals("span"))
-            block.setDoc(8);
+            block.getBlockDivideFeature().setDoc(8);
         else if (ele.getTagName().equals("sup"))
-            block.setDoc(8);
+            block.getBlockDivideFeature().setDoc(8);
         else if (ele.getTagName().equals("img"))
-            block.setDoc(8);
+            block.getBlockDivideFeature().setDoc(8);
         else
-            block.setDoc(333);
+            block.getBlockDivideFeature().setDoc(333);
         //TODO DoC Part
 
         logger.info("node class:" + block.getNode().getElement().getTagName() + "rule Thirteen isApplying");
